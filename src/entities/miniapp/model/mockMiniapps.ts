@@ -1,0 +1,57 @@
+import type { Miniapp } from './types'
+
+export const mockMiniapps: Miniapp[] = [
+  {
+    id: 'schedule',
+    name: 'Schedule',
+    description: 'Командное расписание с запуском во встроенном WebView.',
+    iconUrl: 'https://placehold.co/64x64/5d7cf5/ffffff?text=S',
+    launchUrl: 'https://example.com',
+    version: '1.0.0',
+    status: 'published',
+    allowedRoles: ['admin', 'user'],
+    requiredPermissions: ['calendar:read'],
+    healthcheckUrl: 'https://example.com/health',
+    webhookUrl: 'https://example.com/webhook',
+    allowedOrigins: ['https://example.com'],
+    defaultTheme: 'light',
+    defaultLocale: 'ru',
+    createdAt: '2026-05-01T09:00:00.000Z',
+    updatedAt: '2026-05-10T11:30:00.000Z',
+  },
+  {
+    id: 'reports',
+    name: 'Reports Hub',
+    description: 'Быстрые отчеты по продуктовым и операционным метрикам.',
+    iconUrl: 'https://placehold.co/64x64/38bdf8/ffffff?text=R',
+    launchUrl: 'https://example.com',
+    version: '0.9.4',
+    status: 'draft',
+    allowedRoles: ['admin', 'analyst'],
+    requiredPermissions: ['reports:read'],
+    allowedOrigins: ['https://example.com'],
+    defaultTheme: 'system',
+    defaultLocale: 'en',
+    createdAt: '2026-05-03T14:15:00.000Z',
+    updatedAt: '2026-05-09T16:40:00.000Z',
+  },
+  {
+    id: 'support',
+    name: 'Support Desk',
+    description: 'Мини-приложение для обработки обращений пользователей.',
+    iconUrl: 'https://placehold.co/64x64/22c55e/ffffff?text=D',
+    launchUrl: 'https://example.com',
+    version: '2.1.0',
+    status: 'disabled',
+    allowedRoles: ['admin', 'support'],
+    requiredPermissions: ['tickets:write'],
+    allowedOrigins: ['https://example.com'],
+    defaultTheme: 'light',
+    defaultLocale: 'ru',
+    createdAt: '2026-04-24T10:20:00.000Z',
+    updatedAt: '2026-05-08T08:10:00.000Z',
+  },
+]
+
+export const getMockMiniappById = (miniappId: string) =>
+  mockMiniapps.find((miniapp) => miniapp.id === miniappId)

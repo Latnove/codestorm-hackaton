@@ -1,0 +1,24 @@
+.filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 16px;
+	width: 100%;
+}
+
+.search {
+	flex: 2.4;
+	min-width: 280px;
+}
+
+.filter {
+	flex: 1;
+	min-width: 190px;
+}
+
+@media (width <= 768px) {
+	.search,
+	.filter {
+		width: 100%;
+	}
+}

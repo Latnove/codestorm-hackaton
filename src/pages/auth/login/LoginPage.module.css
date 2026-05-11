@@ -1,0 +1,99 @@
+.page {
+	position: relative;
+	min-height: 100vh;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+}
+
+.wrap {
+	position: relative;
+	z-index: 1;
+	width: min(1180px, calc(100% - 48px));
+	height: 100%;
+	margin: 0 auto;
+	padding: 72px 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.hero {
+	max-width: 660px;
+}
+
+.badge {
+	margin-bottom: 18px;
+	border: 1px solid #dce6ff;
+	border-radius: 999px;
+	background: rgb(255 255 255 / 72%);
+	padding: 8px 14px;
+	box-shadow: 0 12px 30px rgb(80 105 170 / 10%);
+}
+
+.title {
+	max-width: 620px;
+	margin: 0 0 18px !important;
+	color: #172033 !important;
+	font-size: clamp(36px, 5vw, 62px) !important;
+	line-height: 1.02 !important;
+	letter-spacing: 0;
+	display: block;
+}
+
+.lead {
+	max-width: 560px;
+	color: #536179;
+	font-size: 18px;
+	line-height: 1.65;
+}
+
+.loginCard {
+	flex: 0 1 400px;
+	border: 1px solid rgb(221 231 252 / 88%);
+	background: rgb(255 255 255 / 88%);
+	box-shadow:
+		0 26px 70px rgb(80 105 170 / 18%),
+		inset 0 1px 0 rgb(255 255 255 / 90%);
+	backdrop-filter: blur(22px);
+}
+
+.loginCard :global(.ant-card-body) {
+	padding: 34px;
+}
+
+.cardHeader {
+	width: 100%;
+	margin-bottom: 28px;
+}
+
+.logo {
+	margin-bottom: 32px;
+}
+
+.kicker {
+	color: #5d7cf5;
+	font-size: 13px;
+	font-weight: 800;
+	text-transform: uppercase;
+}
+
+.cardHeader h2 {
+	margin: 0 !important;
+	color: #172033 !important;
+}
+
+@media (max-width: 760px) {
+	.wrap {
+		width: min(100% - 28px, 560px);
+		padding: 32px 0;
+	}
+
+	.stats {
+		grid-template-columns: 1fr;
+	}
+
+	.loginCard :global(.ant-card-body) {
+		padding: 24px;
+	}
+}

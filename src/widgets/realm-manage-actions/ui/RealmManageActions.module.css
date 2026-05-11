@@ -1,0 +1,17 @@
+.inline {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.inline :global(.ant-btn) {
+	height: 40px;
+	border-radius: 10px;
+	font-weight: 600;
+}
+
+.inline :global(.ant-btn-dangerous) {
+	background: #fff1f2;
+}

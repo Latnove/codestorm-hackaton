@@ -1,0 +1,182 @@
+.card {
+	border: 0;
+	background: #ffffff;
+	box-shadow: 0 18px 44px rgb(42 65 130 / 10%);
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px;
+	margin-bottom: 18px;
+}
+
+.title {
+	margin-bottom: 4px !important;
+}
+
+.profileCard {
+	display: grid;
+	grid-template-columns: 320px minmax(0, 1fr);
+	gap: 20px;
+	overflow: hidden;
+	border: 1px solid #e5ebf8;
+	border-radius: 20px;
+}
+
+.identity {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 16px;
+	min-width: 0;
+	min-height: 100%;
+	padding: 24px;
+	border-radius: 18px;
+	text-align: center;
+}
+
+.avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 108px;
+	height: 108px;
+	flex: 0 0 auto;
+	border: 8px solid #dfe6ff;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #ffbd55, #ff8a68);
+	color: #ffffff;
+	box-shadow: 0 16px 30px rgb(255 138 104 / 22%);
+}
+
+.avatar span {
+	font-size: 30px;
+	font-weight: 800;
+}
+
+.identityText {
+	min-width: 0;
+}
+
+.realmCode {
+	margin: 0 0 6px !important;
+	color: #1f2b79 !important;
+	font-weight: 700 !important;
+	overflow-wrap: anywhere;
+}
+
+.realmName {
+	display: block;
+	color: #475569;
+	font-weight: 500;
+	overflow-wrap: anywhere;
+}
+
+.content {
+	min-width: 0;
+	padding: 4px;
+	border-radius: 14px;
+	background: #ffffff;
+}
+
+.rows {
+	display: flex;
+	flex-direction: column;
+}
+
+.row {
+	display: grid;
+	grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
+	gap: 16px;
+	padding: 14px 16px;
+	border-bottom: 1px solid #eef2f8;
+}
+
+.row:last-child {
+	border-bottom: 0;
+}
+
+.label,
+.rowLabel {
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.rowValue {
+	color: #18253f;
+	font-size: 15px;
+	font-weight: 500;
+	overflow-wrap: anywhere;
+}
+
+.actionsBlock {
+	margin-top: 32px;
+}
+
+.actionsHeader {
+	margin-bottom: 14px;
+}
+
+.actionsHeader :global(.ant-typography) {
+	margin-bottom: 4px !important;
+}
+
+.actions {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 12px;
+}
+
+.actions :global(.ant-btn) {
+	height: 48px;
+	border: 0;
+	border-radius: 12px;
+	background: #f0fdf4;
+	color: #15803d;
+	font-weight: 700;
+	box-shadow: inset 0 0 0 1px #bbf7d0;
+}
+
+.actions :global(.ant-btn:nth-child(2)) {
+	background: #eff6ff;
+	color: #1d4ed8;
+	box-shadow: inset 0 0 0 1px #bfdbfe;
+}
+
+.actions :global(.ant-btn:nth-child(3)) {
+	background: #fff7ed;
+	color: #c2410c;
+	box-shadow: inset 0 0 0 1px #fed7aa;
+}
+
+.actions :global(.ant-btn:nth-child(4)) {
+	background: #f5f3ff;
+	color: #6d28d9;
+	box-shadow: inset 0 0 0 1px #ddd6fe;
+}
+
+.actions :global(.ant-btn):hover {
+	transform: translateY(-1px);
+	filter: brightness(0.99);
+}
+
+@media (width <= 760px) {
+	.header {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.profileCard {
+		grid-template-columns: 1fr;
+	}
+
+	.row {
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+}

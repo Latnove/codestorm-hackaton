@@ -1,0 +1,22 @@
+.header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 20px;
+}
+
+.mainTitle {
+	margin: 0 0 30px !important;
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+}
+
+@media (width <= 680px) {
+	.header {
+		flex-direction: column;
+	}
+}

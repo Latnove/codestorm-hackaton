@@ -1,0 +1,228 @@
+.layout,
+.layoutCreated {
+	display: grid;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+.layout {
+	grid-template-columns: 500px;
+	justify-content: center;
+	animation: layoutEnter 0.32s ease both;
+}
+
+.layoutCreated {
+	grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+	justify-content: stretch;
+	animation: layoutCreated 0.48s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.formCard,
+.credentialsCard {
+	border: 1px solid #e8eef8;
+	background: #ffffff;
+	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.credentialsCard {
+	height: 100%;
+}
+
+.credentialsCard :global(.ant-card-body) {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.formCard {
+	transition:
+		transform 0.35s ease,
+		box-shadow 0.35s ease,
+		opacity 0.35s ease;
+}
+
+.layoutCreated .formCard {
+	animation: formShiftLeft 0.56s cubic-bezier(0.16, 1, 0.3, 1) both;
+	box-shadow: 0 8px 22px rgb(42 65 130 / 7%);
+}
+
+.credentialsCard {
+	animation: credentialsReveal 0.62s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.header {
+	margin-bottom: 20px;
+}
+
+.header :global(.ant-typography) {
+	margin-bottom: 4px !important;
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.label {
+	color: #26364f;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.error {
+	color: #ff4d4f;
+	font-size: 12px;
+}
+
+.submitRow {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 4px;
+}
+
+.alert {
+	margin-bottom: 16px;
+}
+
+.credentialsList {
+	overflow: hidden;
+	margin-bottom: 16px;
+	border: 1px solid #e8eef8;
+	border-radius: 14px;
+}
+
+.credentialRow {
+	display: grid;
+	grid-template-columns: 120px minmax(0, 1fr) 34px;
+	gap: 12px;
+	align-items: center;
+	padding: 11px 12px 11px 14px;
+	border-bottom: 1px solid #eef2f8;
+}
+
+.credentialRow:last-child {
+	border-bottom: 0;
+}
+
+.credentialLabel {
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.credentialValue {
+	color: #18253f;
+	font-size: 13px;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.copyButton {
+	width: 30px;
+	height: 30px;
+	padding: 0 !important;
+	border-radius: 8px;
+	color: #64748b !important;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.copyButton:hover {
+	background: #f1f5ff !important;
+	color: #2451d6 !important;
+}
+
+.credentialsActions {
+	margin-top: auto !important;
+	display: block;
+	width: 100%;
+}
+
+.downloadButton {
+	width: 100%;
+	margin-bottom: 8px;
+}
+
+.openButton {
+	width: 100%;
+}
+
+@media (width <= 920px) {
+	.layout,
+	.layoutCreated {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (width <= 560px) {
+	.submitRow,
+	.credentialsActions {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.credentialRow {
+		grid-template-columns: 1fr 34px;
+		gap: 4px;
+	}
+
+	.credentialLabel {
+		grid-column: 1 / -1;
+	}
+}
+
+@keyframes formShiftLeft {
+	from {
+		opacity: 0.92;
+		transform: translateX(120px) scale(1.015);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes credentialsReveal {
+	from {
+		opacity: 0;
+		filter: blur(5px);
+		transform: translateX(56px) scale(0.98);
+	}
+
+	to {
+		opacity: 1;
+		filter: blur(0);
+		transform: translateX(0);
+	}
+}
+
+@keyframes layoutEnter {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes layoutCreated {
+	from {
+		column-gap: 64px;
+	}
+
+	to {
+		column-gap: 20px;
+	}
+}

@@ -1,0 +1,13 @@
+.header {
+	margin-bottom: 20px;
+}
+
+.title {
+	text-align: center;
+	margin-top: 0 !important ;
+	transition: all 0.3s;
+}
+
+.leftedTitle {
+	text-align: left;
+}

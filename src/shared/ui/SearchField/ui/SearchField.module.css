@@ -1,0 +1,54 @@
+.field {
+	display: grid;
+	gap: 8px;
+}
+
+.label {
+	color: #26364f;
+	font-size: 14px;
+	font-weight: 800;
+}
+
+.search :global(.ant-input-affix-wrapper) {
+	border-color: #dfe7f6 !important;
+	background: #fbfdff;
+	box-shadow: 0 10px 24px rgb(95 119 168 / 6%);
+}
+
+.search:hover :global(.ant-input-affix-wrapper),
+.search:focus :global(.ant-input-affix-wrapper),
+.search:focus-within :global(.ant-input-affix-wrapper),
+.search:hover :global(.ant-btn),
+.search:focus :global(.ant-btn),
+.search:focus-within :global(.ant-btn) {
+	border-color: #8fa5ff !important;
+	background: #fff;
+	box-shadow: 0 0 0 3px rgb(93 124 245 / 12%);
+}
+
+.search :global(.ant-input-group-addon) {
+	background: transparent !important;
+}
+
+.search :global(.ant-btn) {
+	color: #7b8799;
+}
+
+.search:hover :global(.ant-btn),
+.search:focus-within :global(.ant-btn) {
+	color: #2563eb !important;
+}
+
+.hint,
+.error {
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.hint {
+	color: #7b8799;
+}
+
+.error {
+	color: #d92d20;
+}

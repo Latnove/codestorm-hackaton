@@ -1,0 +1,26 @@
+.button {
+	font-weight: 500 !important;
+	box-shadow: none;
+}
+
+.button:global(.ant-btn-primary) {
+	border: 0 !important;
+	background: linear-gradient(135deg, #5d7cf5, #38bdf8);
+	box-shadow: 0 12px 26px rgb(93 124 245 / 22%);
+}
+
+.button:global(.ant-btn-default) {
+	border-color: #dfe7f6;
+	background: #ffffff;
+	color: #26364f;
+}
+
+.button:global(.ant-btn-default):hover {
+	border-color: #8fa5ff;
+	color: #5d7cf5;
+}
+
+.button:disabled {
+	color: var(--color-white);
+	opacity: 0.7;
+}

@@ -1,0 +1,60 @@
+.table {
+	overflow: hidden;
+	border: 1px solid #e6edf7;
+	border-radius: 18px;
+}
+
+.table :global(.ant-table-thead > tr > th) {
+	border-bottom: 1px solid #e6edf7;
+	background: #f8fbff;
+	color: #526175;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.table :global(.ant-table-tbody > tr > td) {
+	border-bottom: 1px solid #eef3fb;
+	color: #26364f;
+}
+
+.table :global(.ant-table-tbody > tr:hover > td) {
+	background: #f8fbff !important;
+}
+
+.userCell {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	flex: 0 0 auto;
+	border-radius: 50%;
+	background: #eef4ff;
+	color: #2451d6;
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.username {
+	color: #18253f;
+	font-weight: 700;
+}
+
+.roles {
+	row-gap: 6px;
+}
+
+.actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

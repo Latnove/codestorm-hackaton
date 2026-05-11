@@ -1,0 +1,58 @@
+{
+  "hash": "4d4237a7",
+  "configHash": "70fac902",
+  "lockfileHash": "1bb6c2b3",
+  "browserHash": "be5ea80f",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "47d6242c",
+      "needsInterop": true
+    },
+    "antd": {
+      "src": "../../node_modules/antd/es/index.js",
+      "file": "antd.js",
+      "fileHash": "8077791e",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "4855723d",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "5498c8a4",
+      "needsInterop": true
+    },
+    "antd/locale/ru_RU": {
+      "src": "../../node_modules/antd/locale/ru_RU.js",
+      "file": "antd_locale_ru_RU.js",
+      "fileHash": "37993a7b",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "00f3d652",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-H2HGAJAN": {
+      "file": "chunk-H2HGAJAN.js"
+    },
+    "chunk-AUSEWYIV": {
+      "file": "chunk-AUSEWYIV.js"
+    },
+    "chunk-2VHV66RP": {
+      "file": "chunk-2VHV66RP.js"
+    },
+    "chunk-5WRI5ZAA": {
+      "file": "chunk-5WRI5ZAA.js"
+    }
+  }
+}

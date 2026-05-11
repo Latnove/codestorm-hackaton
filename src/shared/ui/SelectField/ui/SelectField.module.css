@@ -1,0 +1,42 @@
+.field {
+	display: grid;
+	gap: 8px;
+}
+
+.label {
+	color: #26364f;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.select {
+	width: 100%;
+}
+
+.select :global(.ant-select-selector) {
+	border-color: #dfe7f6 !important;
+	background: #fbfdff !important;
+	box-shadow: 0 10px 24px rgb(95 119 168 / 6%) !important;
+}
+
+.select:hover :global(.ant-select-selector),
+.select:global(.ant-select-focused) :global(.ant-select-selector) {
+	border-color: #8fa5ff !important;
+	background: #fff !important;
+	box-shadow: 0 0 0 3px rgb(93 124 245 / 12%) !important;
+}
+
+.hint,
+.error {
+	min-height: 18px;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.hint {
+	color: #7b8799;
+}
+
+.error {
+	color: #d92d20;
+}

@@ -1,0 +1,141 @@
+.card {
+	border: 1px solid #e8eef8;
+	background: #ffffff;
+	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.title {
+	margin-bottom: 4px !important;
+}
+
+.list {
+	max-height: 420px;
+	overflow: auto;
+	border: 1px solid #e8eef8;
+	border-radius: 14px;
+	background: #ffffff;
+}
+
+.table {
+	min-width: 980px;
+}
+
+.tableHead,
+.row {
+	display: grid;
+	grid-template-columns:
+		minmax(190px, 1fr) minmax(240px, 1.35fr) 112px minmax(190px, 1fr)
+		176px 120px;
+	column-gap: 16px;
+	align-items: center;
+}
+
+.tableHead {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding: 13px 18px;
+	border-bottom: 1px solid #e8eef8;
+	background: #f8fafc;
+	color: #667085;
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.tableHead span {
+	color: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+}
+
+.row {
+	min-height: 68px;
+	padding: 14px 18px;
+	border-bottom: 1px solid #eef2f8;
+	background: #ffffff;
+	transition: background 0.18s ease;
+}
+
+.row:hover {
+	background: #f8fbff;
+}
+
+.row:last-child {
+	border-bottom: 0;
+}
+
+.userCell {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	flex: 0 0 auto;
+	border-radius: 50%;
+	background: #eef4ff;
+	color: #2451d6;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.username {
+	color: #18253f;
+	font-size: 14px;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.email {
+	color: #64748b;
+	font-size: 13px;
+	overflow-wrap: anywhere;
+}
+
+.date {
+	color: #334155;
+	font-size: 13px;
+	overflow-wrap: anywhere;
+}
+
+.roles :global(.ant-tag),
+.row :global(.ant-tag) {
+	margin-inline-end: 0;
+	border-radius: 999px;
+}
+
+.actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	min-width: 0;
+}
+
+.empty {
+	padding: 30px;
+}
+
+@media (width <= 760px) {
+	.header {
+		flex-direction: column;
+	}
+
+	.list {
+		overflow-x: auto;
+	}
+}
