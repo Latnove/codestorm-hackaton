@@ -7,7 +7,7 @@ import { ConnectMiniAppButton } from '@/features/realms/connect-miniapp'
 import { CreateRoleButton } from '@/features/realms/create-role'
 import { RotateSecretButton } from '@/features/realms/rotate-secret'
 import { ViewStatisticsButton } from '@/features/realms/view-statistics'
-import { ROUTES } from '@/shared/config'
+import { buildUserCreateRoute } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { Card, Tag } from 'antd'
 import Text from 'antd/es/typography/Text'
@@ -98,7 +98,9 @@ export const RealmOverview = ({
 				<div className={styles.actions}>
 					{isRoot && (
 						<ButtonField
-							onClick={() => navigate(ROUTES.USER_CREATE)}
+							onClick={() =>
+								navigate(buildUserCreateRoute({ realmCode: realm.code }))
+							}
 							type='text'
 						>
 							Создать пользователя

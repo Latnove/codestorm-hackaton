@@ -21,6 +21,12 @@
 	font-weight: 500;
 }
 
+.headerMeta {
+	display: flex;
+	align-items: stretch;
+	gap: 12px;
+}
+
 .updatedAt {
 	display: flex;
 	align-items: flex-start;
@@ -32,6 +38,30 @@
 	border-radius: 16px;
 	background: #ffffff;
 	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.scope {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	min-width: 250px;
+	padding: 14px 16px;
+	border: 1px solid #d9e8ff;
+	border-radius: 16px;
+	background: #f8fbff;
+	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.scope > div {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.scope :global(.ant-typography) {
+	overflow-wrap: anywhere;
 }
 
 .chartsGrid {
@@ -56,6 +86,12 @@
 		flex-direction: column;
 	}
 
+	.headerMeta {
+		width: 100%;
+		flex-direction: column;
+	}
+
+	.scope,
 	.updatedAt {
 		width: 100%;
 	}

@@ -1,0 +1,197 @@
+.floatingButton {
+	position: fixed;
+	right: 28px;
+	bottom: 28px;
+	z-index: 1100;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	box-shadow: 0 18px 42px rgb(49 72 160 / 28%);
+}
+
+.drawer :global(.ant-drawer-body) {
+	padding: 0;
+	background: #f8fbff;
+}
+
+.drawerBody {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+}
+
+.messages {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 12px;
+	min-height: 0;
+	padding: 18px;
+	overflow-y: auto;
+}
+
+.messageRow {
+	display: flex;
+	width: 100%;
+}
+
+.messageRowUser {
+	justify-content: flex-end;
+}
+
+.messageRowAssistant {
+	justify-content: flex-start;
+}
+
+.bubble {
+	max-width: 82%;
+	padding: 12px 14px;
+	border: 1px solid #e4ebf8;
+	border-radius: 14px;
+	background: #ffffff;
+	box-shadow: 0 10px 24px rgb(42 65 130 / 8%);
+}
+
+.bubbleUser {
+	border-color: #d9e2ff;
+	background: #eef4ff;
+}
+
+.bubbleError {
+	border-color: #ffd1d1;
+	background: #fff7f7;
+	color: #d4380d;
+}
+
+.messageText {
+	margin: 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.sending {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: #64748b;
+	font-weight: 600;
+}
+
+.attachments {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.attachment {
+	min-width: 0;
+	padding: 8px;
+	border: 1px solid #dce6f8;
+	border-radius: 10px;
+	background: rgb(255 255 255 / 70%);
+}
+
+.attachmentImage {
+	display: block;
+	width: 100%;
+	height: 92px;
+	object-fit: cover;
+	border-radius: 8px;
+	background: #edf2fb;
+}
+
+.attachmentName {
+	display: block;
+	margin-top: 6px;
+	overflow: hidden;
+	color: #475569;
+	font-size: 12px;
+	font-weight: 600;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.fileAttachment {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.fileIcon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 8px;
+	background: #e8edff;
+	color: var(--color-purple-active);
+	font-weight: 800;
+}
+
+.inputPanel {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 14px;
+	border-top: 1px solid #e2e8f0;
+	background: #ffffff;
+}
+
+.textarea {
+	resize: none;
+}
+
+.selectedFiles {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.fileChip {
+	max-width: 100%;
+	margin: 0;
+}
+
+.inputActions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.inputActionsRight {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.hiddenInput {
+	display: none;
+}
+
+.empty {
+	margin: auto;
+	color: #64748b;
+	text-align: center;
+}
+
+@media (width <= 560px) {
+	.floatingButton {
+		right: 18px;
+		bottom: 18px;
+	}
+
+	.bubble {
+		max-width: 92%;
+	}
+
+	.attachments {
+		grid-template-columns: 1fr;
+	}
+}

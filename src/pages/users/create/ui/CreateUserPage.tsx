@@ -21,9 +21,9 @@ import { SelectField } from '@/shared/ui/SelectField'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Card, message, Tag, Typography } from 'antd'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import styles from './CreateUserPage.module.css'
 
 const { Text, Title } = Typography
@@ -40,12 +40,14 @@ const statusOptions = [
 
 export const CreateUserPage = () => {
 	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
 	const queryClient = useQueryClient()
 	const { data: realmsPage } = useQuery({
 		queryFn: () => getAdminRealms(),
 		queryKey: realmKeys.list(),
 	})
 	const realms = realmsPage?.items ?? []
+	const requestedRealmCode = searchParams.get('realmCode')?.trim() ?? ''
 	const [createdUser, setCreatedUser] = useState<PlatformUser | null>(null)
 	const createUserMutation = useMutation({
 		mutationFn: (values: CreateUserFormValues) =>
@@ -67,10 +69,14 @@ export const CreateUserPage = () => {
 		},
 	})
 
-	const realmOptions = realms.map(realm => ({
-		label: `${realm.name} (${realm.code})`,
-		value: realm.code,
-	}))
+	const realmOptions = useMemo(
+		() =>
+			realms.map(realm => ({
+				label: `${realm.name} (${realm.code})`,
+				value: realm.code,
+			})),
+		[realms],
+	)
 
 	const {
 		control,
@@ -83,7 +89,7 @@ export const CreateUserPage = () => {
 			confirmPassword: '',
 			email: '',
 			password: '',
-			realmCode: realmOptions[0]?.value ?? '',
+			realmCode: requestedRealmCode,
 			role: Roles.ADMIN,
 			status: 'active',
 			username: '',
@@ -93,10 +99,23 @@ export const CreateUserPage = () => {
 	})
 
 	useEffect(() => {
-		if (!getValues('realmCode') && realmOptions[0]?.value) {
-			setValue('realmCode', realmOptions[0].value)
+		const currentRealmCode = getValues('realmCode')
+		const hasCurrentRealm = realmOptions.some(
+			option => option.value === currentRealmCode,
+		)
+		const hasRequestedRealm = realmOptions.some(
+			option => option.value === requestedRealmCode,
+		)
+		const nextRealmCode = hasRequestedRealm
+			? requestedRealmCode
+			: realmOptions[0]?.value
+
+		if (!hasCurrentRealm && nextRealmCode) {
+			setValue('realmCode', nextRealmCode, {
+				shouldValidate: true,
+			})
 		}
-	}, [getValues, realmOptions, setValue])
+	}, [getValues, realmOptions, requestedRealmCode, setValue])
 
 	const handleCreate = (values: CreateUserFormValues) => {
 		createUserMutation.mutate(values)

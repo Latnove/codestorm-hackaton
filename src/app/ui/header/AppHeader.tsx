@@ -186,6 +186,15 @@ export const AppHeader = () => {
 								Мой Realm
 							</ButtonField>
 						)}
+
+						<ButtonField
+							className={styles.logoutButton}
+							loading={logoutMutation.isPending}
+							onClick={handleLogout}
+							type='default'
+						>
+							Выйти
+						</ButtonField>
 					</nav>
 				) : (
 					<ButtonField onClick={() => navigate(ROUTES.LOGIN)} type='primary'>

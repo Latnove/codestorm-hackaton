@@ -42,6 +42,25 @@ export const apiClient = axios.create({
 const buildAuthorizationHeader = (tokens: AuthTokens) =>
 	`${tokens.tokenType ?? 'Bearer'} ${tokens.accessToken}`
 
+const getAuthorizationHeader = (config: RetriableRequestConfig) => {
+	const headers = config.headers
+
+	if (!headers) {
+		return undefined
+	}
+
+	if ('get' in headers && typeof headers.get === 'function') {
+		const value = headers.get('Authorization')
+
+		return typeof value === 'string' ? value : undefined
+	}
+
+	const plainHeaders = headers as Record<string, unknown>
+	const value = plainHeaders.Authorization ?? plainHeaders.authorization
+
+	return typeof value === 'string' ? value : undefined
+}
+
 const isAuthEndpoint = (url?: string) =>
 	url?.includes('/api/admin/auth/login') ||
 	url?.includes('/api/admin/auth/refresh')
@@ -95,6 +114,17 @@ apiClient.interceptors.response.use(
 		}
 
 		originalRequest._isRetry = true
+		const currentAuthorizationHeader = buildAuthorizationHeader(tokens)
+		const requestAuthorizationHeader = getAuthorizationHeader(originalRequest)
+
+		if (
+			requestAuthorizationHeader &&
+			requestAuthorizationHeader !== currentAuthorizationHeader
+		) {
+			originalRequest.headers.Authorization = currentAuthorizationHeader
+
+			return apiClient(originalRequest)
+		}
 
 		try {
 			refreshRequest ??= refreshAdminToken(tokens.refreshToken).finally(() => {

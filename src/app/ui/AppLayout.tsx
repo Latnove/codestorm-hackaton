@@ -1,4 +1,5 @@
 import { Layout } from 'antd'
+import { AdminCopilotWidget } from '@/features/admin-copilot'
 import { Outlet } from 'react-router-dom'
 import styles from './AppLayout.module.css'
 import { AppFooter } from './footer/AppFooter'
@@ -14,6 +15,7 @@ export const AppLayout = () => {
 				<Outlet />
 			</Content>
 			<AppFooter />
+			<AdminCopilotWidget />
 		</Layout>
 	)
 }
