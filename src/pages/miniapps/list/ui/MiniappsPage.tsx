@@ -2,16 +2,14 @@ import {
 	accessTypeLabels,
 	realmMiniAppStatusColors,
 	realmMiniAppStatusLabels,
+	getRealmMiniApps,
+	realmMiniAppKeys,
 	type AccessType,
 	type RealmMiniApp,
 	type RealmMiniAppStatus,
 } from '@/entities/miniapp'
 import { getRealmMiniAppPermissions, useUserStore } from '@/entities/user'
-import {
-	selectVisibleRealmMiniApps,
-	useRealmMiniAppsStore,
-} from '@/features/miniapps'
-import { useRealmsStore } from '@/features/realms'
+import { getAdminRealm, realmKeys } from '@/entities/realm'
 import {
 	buildRealmMiniappCreateRoute,
 	buildRealmMiniappRoute,
@@ -21,12 +19,12 @@ import {
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { SearchField } from '@/shared/ui/SearchField'
 import { SelectField } from '@/shared/ui/SelectField'
+import { useQuery } from '@tanstack/react-query'
 import { Card, Empty, Space, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useShallow } from 'zustand/react/shallow'
 import { RealmMiniAppActions } from '../../shared/ui/RealmMiniAppActions'
 import styles from '../../shared/ui/RealmMiniAppsPage.module.css'
 
@@ -56,17 +54,26 @@ export const MiniappsPage = () => {
 	const navigate = useNavigate()
 	const { realmCode = '' } = useParams()
 	const user = useUserStore(state => state.user)
-	const realm = useRealmsStore(state =>
-		state.realms.find(item => item.code === realmCode),
-	)
-	const miniApps = useRealmMiniAppsStore(
-		useShallow(selectVisibleRealmMiniApps(realmCode)),
-	)
 	const [filters, setFilters] = useState<MiniAppsFiltersForm>({
 		accessType: 'ALL',
 		search: '',
 		status: 'ALL',
 	})
+	const { data: realm, isLoading: isRealmLoading } = useQuery({
+		enabled: Boolean(realmCode),
+		queryFn: () => getAdminRealm(realmCode),
+		queryKey: realmKeys.detail(realmCode),
+	})
+	const queryParams = {
+		search: filters.search,
+		status: filters.status,
+	}
+	const { data: miniAppsPage } = useQuery({
+		enabled: Boolean(realmCode),
+		queryFn: () => getRealmMiniApps(realmCode, queryParams),
+		queryKey: realmMiniAppKeys.list(realmCode, queryParams),
+	})
+	const miniApps = miniAppsPage?.items ?? []
 	const { control, watch } = useForm<MiniAppsFiltersForm>({
 		defaultValues: filters,
 	})
@@ -103,6 +110,10 @@ export const MiniappsPage = () => {
 			return matchesSearch && matchesStatus && matchesAccessType
 		})
 	}, [filters, miniApps])
+
+	if (isRealmLoading) {
+		return null
+	}
 
 	if (!realm) {
 		return <Navigate to={ROUTES.NOT_FOUND} />

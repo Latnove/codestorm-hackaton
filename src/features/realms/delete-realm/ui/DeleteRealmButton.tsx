@@ -1,7 +1,8 @@
-import { useRealmsStore } from '@/features/realms/realms-catalog/model'
+import { deleteAdminRealm, realmKeys } from '@/entities/realm'
 import { ROUTES } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { DeleteConfirm } from '@/shared/ui/DeleteConfirm'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -20,7 +21,19 @@ export const DeleteRealmButton = ({
 }: DeleteRealmButtonProps) => {
 	const location = useLocation()
 	const navigate = useNavigate()
-	const deleteRealm = useRealmsStore(state => state.deleteRealm)
+	const queryClient = useQueryClient()
+	const deleteRealmMutation = useMutation({
+		mutationFn: () => deleteAdminRealm(realmCode),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: realmKeys.lists() })
+			void queryClient.removeQueries({ queryKey: realmKeys.detail(realmCode) })
+			message.success(`Realm ${realmCode} удалён`)
+			onDone?.()
+		},
+		onError: () => {
+			message.error(`Не удалось удалить Realm ${realmCode}`)
+		},
+	})
 
 	const handleDelete = () => {
 		const isCurrentRealmPage =
@@ -33,11 +46,7 @@ export const DeleteRealmButton = ({
 			navigate(redirectPath, { replace: isCurrentRealmPage })
 		}
 
-		window.setTimeout(() => {
-			deleteRealm(realmCode)
-			message.success(`Realm ${realmCode} удалён`)
-			onDone?.()
-		}, 0)
+		deleteRealmMutation.mutate()
 	}
 
 	return (
@@ -47,7 +56,11 @@ export const DeleteRealmButton = ({
 			onConfirm={handleDelete}
 			title='Удалить Realm?'
 		>
-			<ButtonField danger type={variant === 'menu-item' ? 'text' : 'default'}>
+			<ButtonField
+				danger
+				loading={deleteRealmMutation.isPending}
+				type={variant === 'menu-item' ? 'text' : 'default'}
+			>
 				Удалить
 			</ButtonField>
 		</DeleteConfirm>

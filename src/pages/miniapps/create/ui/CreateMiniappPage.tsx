@@ -1,19 +1,24 @@
-import type { RealmMiniAppFormValues } from '@/entities/miniapp'
-import { getRealmMiniAppPermissions, useUserStore } from '@/entities/user'
-import { useRealmMiniAppsStore } from '@/features/miniapps'
 import {
-	selectRealmRolesByRealmCode,
-	useRealmRolesStore,
-	useRealmsStore,
-} from '@/features/realms'
+	connectRealmMiniApp,
+	getRealmMiniApps,
+	realmMiniAppKeys,
+	type RealmMiniAppFormValues,
+} from '@/entities/miniapp'
+import { getRealmMiniAppPermissions, useUserStore } from '@/entities/user'
+import {
+	getAdminRealm,
+	getRealmRoles,
+	realmKeys,
+	realmRoleKeys,
+} from '@/entities/realm'
 import {
 	buildRealmMiniappRoute,
 	buildRealmMiniappsRoute,
 	ROUTES,
 } from '@/shared/config'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, message, Typography } from 'antd'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useShallow } from 'zustand/react/shallow'
 import { RealmMiniAppForm } from '../../shared/ui/RealmMiniAppForm'
 import styles from '../../shared/ui/RealmMiniAppsPage.module.css'
 
@@ -34,19 +39,50 @@ const initialValues: RealmMiniAppFormValues = {
 
 export const CreateMiniappPage = () => {
 	const navigate = useNavigate()
+	const queryClient = useQueryClient()
 	const { realmCode = '' } = useParams()
 	const user = useUserStore(state => state.user)
-	const realm = useRealmsStore(state =>
-		state.realms.find(item => item.code === realmCode),
-	)
-	const realmRoles = useRealmRolesStore(
-		useShallow(selectRealmRolesByRealmCode(realmCode)),
-	)
-	const miniApps = useRealmMiniAppsStore(state => state.miniApps)
-	const createRealmMiniApp = useRealmMiniAppsStore(
-		state => state.createRealmMiniApp,
-	)
+	const { data: realm, isLoading: isRealmLoading } = useQuery({
+		enabled: Boolean(realmCode),
+		queryFn: () => getAdminRealm(realmCode),
+		queryKey: realmKeys.detail(realmCode),
+	})
+	const { data: realmRoles = [] } = useQuery({
+		enabled: Boolean(realmCode),
+		queryFn: () => getRealmRoles(realmCode),
+		queryKey: realmRoleKeys.list(realmCode),
+	})
+	const { data: miniAppsPage } = useQuery({
+		enabled: Boolean(realmCode),
+		queryFn: () => getRealmMiniApps(realmCode),
+		queryKey: realmMiniAppKeys.list(realmCode),
+	})
+	const createMiniAppMutation = useMutation({
+		mutationFn: (values: RealmMiniAppFormValues) =>
+			connectRealmMiniApp(realmCode, values),
+		onSuccess: miniApp => {
+			void queryClient.invalidateQueries({
+				queryKey: realmMiniAppKeys.lists(realmCode),
+			})
+			void queryClient.invalidateQueries({
+				queryKey: realmMiniAppKeys.detail(realmCode, miniApp.code),
+			})
+			void queryClient.invalidateQueries({ queryKey: realmKeys.lists() })
+			void queryClient.invalidateQueries({
+				queryKey: realmKeys.detail(realmCode),
+			})
+			message.success(`MiniApp ${miniApp.code} создан`)
+			navigate(buildRealmMiniappRoute(realmCode, miniApp.code))
+		},
+		onError: () => {
+			message.error('Не удалось создать MiniApp')
+		},
+	})
 	const permissions = getRealmMiniAppPermissions(user, realmCode)
+
+	if (isRealmLoading) {
+		return null
+	}
 
 	if (!realm) {
 		return <Navigate to={ROUTES.NOT_FOUND} />
@@ -57,12 +93,10 @@ export const CreateMiniappPage = () => {
 	}
 
 	const handleFinish = (values: RealmMiniAppFormValues) => {
-		const miniApp = createRealmMiniApp(realm.code, values)
-		message.success(`MiniApp ${miniApp.code} создан`)
-		navigate(buildRealmMiniappRoute(realm.code, miniApp.code))
+		createMiniAppMutation.mutate(values)
 	}
 
-	const existingCodes = miniApps
+	const existingCodes = (miniAppsPage?.items ?? [])
 		.filter(
 			miniApp =>
 				miniApp.realmCode === realm.code && miniApp.status !== 'DELETED',

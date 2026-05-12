@@ -1,24 +1,29 @@
 import {
+	deleteRealmMiniApp,
 	getRealmMiniAppPublishError,
+	publishRealmMiniApp,
+	realmMiniAppKeys,
+	stopRealmMiniApp,
 	type RealmMiniApp,
 	type RealmMiniAppFormValues,
+	updateRealmMiniApp,
 } from '@/entities/miniapp'
 import type { RealmMiniAppPermissions } from '@/entities/user'
-import { useRealmMiniAppsStore } from '@/features/miniapps'
 import {
-	selectRealmRolesByRealmCode,
-	useRealmRolesStore,
-} from '@/features/realms'
+	getRealmRoles,
+	realmKeys,
+	realmRoleKeys,
+} from '@/entities/realm'
 import {
 	buildRealmMiniappAccessRoute,
 	buildRealmMiniappRoute,
 } from '@/shared/config'
 import { ActionsDropdown } from '@/shared/ui/ActionsDropdown'
 import { ButtonField } from '@/shared/ui/ButtonField'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { message, Modal } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useShallow } from 'zustand/react/shallow'
 import {
 	buildRealmMiniAppFormValues,
 	RealmMiniAppForm,
@@ -42,26 +47,76 @@ export const RealmMiniAppActions = ({
 	variant = 'dropdown',
 }: RealmMiniAppActionsProps) => {
 	const navigate = useNavigate()
+	const queryClient = useQueryClient()
 	const [editOpen, setEditOpen] = useState(false)
-	const realmRoles = useRealmRolesStore(
-		useShallow(selectRealmRolesByRealmCode(miniApp.realmCode)),
-	)
-	const publishRealmMiniApp = useRealmMiniAppsStore(
-		state => state.publishRealmMiniApp,
-	)
-	const stopRealmMiniApp = useRealmMiniAppsStore(
-		state => state.stopRealmMiniApp,
-	)
-	const deleteRealmMiniApp = useRealmMiniAppsStore(
-		state => state.deleteRealmMiniApp,
-	)
-	const updateRealmMiniApp = useRealmMiniAppsStore(
-		state => state.updateRealmMiniApp,
-	)
-
+	const { data: realmRoles = [] } = useQuery({
+		enabled: Boolean(miniApp.realmCode),
+		queryFn: () => getRealmRoles(miniApp.realmCode),
+		queryKey: realmRoleKeys.list(miniApp.realmCode),
+	})
+	const invalidateMiniApp = () => {
+		void queryClient.invalidateQueries({
+			queryKey: realmMiniAppKeys.lists(miniApp.realmCode),
+		})
+		void queryClient.invalidateQueries({
+			queryKey: realmMiniAppKeys.detail(miniApp.realmCode, miniApp.code),
+		})
+		void queryClient.invalidateQueries({
+			queryKey: realmKeys.detail(miniApp.realmCode),
+		})
+		void queryClient.invalidateQueries({ queryKey: realmKeys.lists() })
+	}
 	const closeAction = () => {
 		onDone?.()
 	}
+	const updateMiniAppMutation = useMutation({
+		mutationFn: (values: RealmMiniAppFormValues) =>
+			updateRealmMiniApp(miniApp.realmCode, miniApp.code, values),
+		onSuccess: updatedMiniApp => {
+			invalidateMiniApp()
+			message.success(`MiniApp ${updatedMiniApp.code} обновлён`)
+			setEditOpen(false)
+		},
+		onError: () => {
+			message.error(`Не удалось обновить MiniApp ${miniApp.code}`)
+		},
+	})
+	const publishMiniAppMutation = useMutation({
+		mutationFn: () => publishRealmMiniApp(miniApp.realmCode, miniApp.code),
+		onSuccess: () => {
+			invalidateMiniApp()
+			message.success(`MiniApp ${miniApp.code} опубликован`)
+			closeAction()
+		},
+		onError: () => {
+			message.error(`Не удалось опубликовать MiniApp ${miniApp.code}`)
+		},
+	})
+	const stopMiniAppMutation = useMutation({
+		mutationFn: () => stopRealmMiniApp(miniApp.realmCode, miniApp.code),
+		onSuccess: () => {
+			invalidateMiniApp()
+			message.success(`MiniApp ${miniApp.code} остановлен`)
+			closeAction()
+		},
+		onError: () => {
+			message.error(`Не удалось остановить MiniApp ${miniApp.code}`)
+		},
+	})
+	const deleteMiniAppMutation = useMutation({
+		mutationFn: () => deleteRealmMiniApp(miniApp.realmCode, miniApp.code),
+		onSuccess: () => {
+			invalidateMiniApp()
+			message.success(`MiniApp ${miniApp.code} удалён из Realm`)
+			if (afterDeletePath) {
+				navigate(afterDeletePath)
+			}
+			closeAction()
+		},
+		onError: () => {
+			message.error(`Не удалось удалить MiniApp ${miniApp.code}`)
+		},
+	})
 
 	const openRoute = (route: string) => {
 		navigate(route)
@@ -78,9 +133,7 @@ export const RealmMiniAppActions = ({
 	}
 
 	const handleEditFinish = (values: RealmMiniAppFormValues) => {
-		updateRealmMiniApp(miniApp.realmCode, miniApp.code, values)
-		message.success(`MiniApp ${miniApp.code} обновлён`)
-		setEditOpen(false)
+		updateMiniAppMutation.mutate(values)
 	}
 
 	const handlePublish = () => {
@@ -97,9 +150,7 @@ export const RealmMiniAppActions = ({
 				'После публикации он станет доступен пользователям Realm.',
 			okText: 'Опубликовать',
 			onOk: () => {
-				publishRealmMiniApp(miniApp.realmCode, miniApp.code)
-				message.success(`MiniApp ${miniApp.code} опубликован`)
-				closeAction()
+				publishMiniAppMutation.mutate()
 			},
 			title: 'Опубликовать MiniApp?',
 		})
@@ -110,9 +161,7 @@ export const RealmMiniAppActions = ({
 			content: 'Пользователи больше не смогут запускать его.',
 			okText: 'Остановить',
 			onOk: () => {
-				stopRealmMiniApp(miniApp.realmCode, miniApp.code)
-				message.success(`MiniApp ${miniApp.code} остановлен`)
-				closeAction()
+				stopMiniAppMutation.mutate()
 			},
 			title: 'Остановить MiniApp?',
 		})
@@ -124,12 +173,7 @@ export const RealmMiniAppActions = ({
 			okButtonProps: { danger: true },
 			okText: 'Удалить',
 			onOk: () => {
-				deleteRealmMiniApp(miniApp.realmCode, miniApp.code)
-				message.success(`MiniApp ${miniApp.code} удалён из Realm`)
-				if (afterDeletePath) {
-					navigate(afterDeletePath)
-				}
-				closeAction()
+				deleteMiniAppMutation.mutate()
 			},
 			title: 'Удалить MiniApp из Realm?',
 		})

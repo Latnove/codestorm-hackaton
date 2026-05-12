@@ -10,8 +10,11 @@ export type User = {
 }
 
 export type AuthPayload = {
-	user: User
 	accessToken: string
+	expiresIn?: number
+	refreshToken: string
+	tokenType?: string
+	user: User
 }
 
 export type PlatformUserStatus = 'active' | 'disable'

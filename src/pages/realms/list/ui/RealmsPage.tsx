@@ -1,14 +1,16 @@
 import { Roles, useUserStore } from '@/entities/user'
+import { getAdminRealms, realmKeys } from '@/entities/realm'
 import {
 	RealmsFilters,
 	RealmsList,
-	selectFilteredRealms,
+	useRealmsFiltersState,
 	useRealmsStore,
 } from '@/features/realms'
 import { buildRealmOverviewRoute, ROUTES } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { RealmManageActions } from '@/widgets/realm-manage-actions'
 import { Card, Space } from 'antd'
+import { useQuery } from '@tanstack/react-query'
 import Title from 'antd/es/typography/Title'
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
@@ -19,7 +21,12 @@ export const RealmsPage = () => {
 	const navigate = useNavigate()
 	const user = useUserStore(state => state.user)
 
-	const filteredRealms = useRealmsStore(useShallow(selectFilteredRealms))
+	const filters = useRealmsStore(useShallow(useRealmsFiltersState))
+	const { data: realmsPage, isLoading } = useQuery({
+		queryFn: () => getAdminRealms(filters),
+		queryKey: realmKeys.list(filters),
+	})
+	const realms = realmsPage?.items ?? []
 	const isRoot = user?.role === Roles.ROOT
 
 	const openRealm = (realmCode: string) => {
@@ -57,7 +64,8 @@ export const RealmsPage = () => {
 					<RealmsFilters />
 
 					<RealmsList
-						data={filteredRealms}
+						data={realms}
+						loading={isLoading}
 						onOpen={openRealm}
 						renderActions={
 							isRoot

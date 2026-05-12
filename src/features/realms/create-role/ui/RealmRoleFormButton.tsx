@@ -1,13 +1,17 @@
 import {
+	createRealmRole,
 	realmRoleSchema,
+	realmRoleKeys,
+	roleMappingKeys,
+	updateRealmRole,
 	type RealmRole,
 	type RealmRoleFormValues,
 } from '@/entities/realm'
-import { useRealmRolesStore } from '@/features/realms/realm-roles/model'
 import { ButtonField, type ButtonFieldProps } from '@/shared/ui/ButtonField'
 import { InputField } from '@/shared/ui/InputField'
 import { TextAreaField } from '@/shared/ui/TextAreaField'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message, Modal } from 'antd'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
@@ -41,10 +45,9 @@ export const RealmRoleFormButton = ({
 	role,
 	triggerProps,
 }: RealmRoleFormButtonProps) => {
+	const queryClient = useQueryClient()
 	const [open, setOpen] = useState(false)
 	const [searchParams, setSearchParams] = useSearchParams()
-	const createRealmRole = useRealmRolesStore(state => state.createRealmRole)
-	const updateRealmRole = useRealmRolesStore(state => state.updateRealmRole)
 	const roleCodes = useMemo(
 		() => new Set(existingRoleCodes),
 		[existingRoleCodes],
@@ -62,6 +65,47 @@ export const RealmRoleFormButton = ({
 		defaultValues: emptyFormValues,
 		mode: 'onChange',
 		resolver: zodResolver(realmRoleSchema),
+	})
+	const invalidateRoles = () => {
+		void queryClient.invalidateQueries({
+			queryKey: realmRoleKeys.list(realmCode),
+		})
+		void queryClient.invalidateQueries({
+			queryKey: roleMappingKeys.list(realmCode),
+		})
+	}
+	const createRoleMutation = useMutation({
+		mutationFn: (values: RealmRoleFormValues) =>
+			createRealmRole(realmCode, values),
+		onSuccess: roleResponse => {
+			invalidateRoles()
+			message.success(`Роль ${roleResponse.code} создана`)
+			setOpen(false)
+			reset(emptyFormValues)
+			onDone?.()
+		},
+		onError: () => {
+			message.error('Не удалось создать роль')
+		},
+	})
+	const updateRoleMutation = useMutation({
+		mutationFn: (values: RealmRoleFormValues) =>
+			role
+				? updateRealmRole(realmCode, role.code, {
+						description: values.description,
+						name: values.name,
+					})
+				: Promise.reject(new Error('Role is required')),
+		onSuccess: roleResponse => {
+			invalidateRoles()
+			message.success(`Роль ${roleResponse.code} обновлена`)
+			setOpen(false)
+			reset(emptyFormValues)
+			onDone?.()
+		},
+		onError: () => {
+			message.error('Не удалось обновить роль')
+		},
 	})
 
 	const openModal = () => {
@@ -102,11 +146,7 @@ export const RealmRoleFormButton = ({
 
 	const handleSave = (values: RealmRoleFormValues) => {
 		if (role) {
-			updateRealmRole(role.id, values)
-			message.success(`Роль ${role.code} обновлена`)
-			setOpen(false)
-			reset(emptyFormValues)
-			onDone?.()
+			updateRoleMutation.mutate(values)
 			return
 		}
 
@@ -118,11 +158,7 @@ export const RealmRoleFormButton = ({
 			return
 		}
 
-		createRealmRole(realmCode, values)
-		message.success(`Роль ${values.code} создана`)
-		setOpen(false)
-		reset(emptyFormValues)
-		onDone?.()
+		createRoleMutation.mutate(values)
 	}
 
 	return (
@@ -169,7 +205,11 @@ export const RealmRoleFormButton = ({
 						<ButtonField
 							disabled={!isDirty || !isValid}
 							htmlType='submit'
-							loading={isSubmitting}
+							loading={
+								isSubmitting ||
+								createRoleMutation.isPending ||
+								updateRoleMutation.isPending
+							}
 							type='primary'
 						>
 							{isEdit ? 'Сохранить' : 'Создать'}

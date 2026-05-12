@@ -13,12 +13,14 @@ const { Text } = Typography
 
 interface RealmsListProps {
 	data: Realm[]
+	loading?: boolean
 	onOpen: (realmCode: string) => void
 	renderActions?: (realm: Realm) => ReactNode
 }
 
 export const RealmsList = ({
 	data,
+	loading = false,
 	onOpen,
 	renderActions,
 }: RealmsListProps) => {
@@ -66,6 +68,7 @@ export const RealmsList = ({
 			columns={columns}
 			dataSource={data}
 			className={styles.table}
+			loading={loading}
 			onRow={realm => ({
 				onClick: () => onOpen(realm.code),
 				style: { cursor: 'pointer' },

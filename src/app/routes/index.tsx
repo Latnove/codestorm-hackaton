@@ -18,8 +18,7 @@ import {
 	RoleMappingPage,
 } from '@/pages/realms'
 import { CreateUserPage, UserDetailsPage, UsersPage } from '@/pages/users'
-import { EXTERNAL_LINKS, ROUTES } from '@/shared/config'
-import { ExternalRedirect } from '@/shared/ui/ExternalRedirect'
+import { ROUTES } from '@/shared/config'
 import { Navigate } from 'react-router-dom'
 import { RequireRole } from '../providers/router/RequireRole'
 import { AppLayout } from '../ui/AppLayout'
@@ -208,28 +207,6 @@ export const routes = [
 				element: (
 					<RequireRole roles={[Roles.ADMIN]}>
 						<LaunchPage />
-					</RequireRole>
-				),
-			},
-			{
-				path: ROUTES.ANALYTICS,
-				element: (
-					<RequireRole roles={[Roles.ADMIN]}>
-						<ExternalRedirect
-							title='Переходим в Grafana Analytics'
-							to={EXTERNAL_LINKS.GRAFANA_ANALYTICS}
-						/>
-					</RequireRole>
-				),
-			},
-			{
-				path: ROUTES.AUDIT_LOGS,
-				element: (
-					<RequireRole roles={[Roles.ADMIN]}>
-						<ExternalRedirect
-							title='Переходим в Grafana Logs'
-							to={EXTERNAL_LINKS.GRAFANA_LOGS}
-						/>
 					</RequireRole>
 				),
 			},

@@ -1,11 +1,11 @@
-import { type CreateRealmFormValues } from '@/entities/realm'
 import {
-	buildRealm,
-	generateSecret,
+	createAdminRealm,
+	realmKeys,
+	type CreateRealmFormValues,
 	type RealmCredentials,
-} from '@/features/realms/create-realm/lib'
-import { useRealmsStore } from '@/features/realms/realms-catalog/model'
+} from '@/entities/realm'
 import { buildRealmOverviewRoute } from '@/shared/config'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useState, type FC } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -19,10 +19,24 @@ interface ICreateRealmForm {
 
 export const CreateRealmForm: FC<ICreateRealmForm> = ({ onCreate }) => {
 	const navigate = useNavigate()
+	const queryClient = useQueryClient()
 	const [messageApi, contextHolder] = message.useMessage()
-	const createRealm = useRealmsStore(state => state.createRealm)
-	const realms = useRealmsStore(state => state.realms)
 	const [credentials, setCredentials] = useState<RealmCredentials | null>(null)
+	const createRealmMutation = useMutation({
+		mutationFn: createAdminRealm,
+		onSuccess: result => {
+			setCredentials(result.credentials)
+			onCreate?.()
+			void queryClient.invalidateQueries({ queryKey: realmKeys.lists() })
+			void queryClient.invalidateQueries({
+				queryKey: realmKeys.detail(result.realm.code),
+			})
+			messageApi.success('Realm создан')
+		},
+		onError: () => {
+			messageApi.error('Не удалось создать Realm')
+		},
+	})
 
 	const copyValue = async (label: string, value: string) => {
 		try {
@@ -34,24 +48,7 @@ export const CreateRealmForm: FC<ICreateRealmForm> = ({ onCreate }) => {
 	}
 
 	const handleCreate = (values: CreateRealmFormValues) => {
-		const codeExists = realms.some(realm => realm.code === values.code)
-
-		if (codeExists) {
-			messageApi.error('Realm с таким code уже существует')
-			return
-		}
-
-		const realm = buildRealm(values)
-		const createdCredentials = {
-			clientId: realm.metadata.clientId,
-			clientSecret: generateSecret(),
-			realmCode: realm.code,
-		}
-
-		createRealm(realm)
-		setCredentials(createdCredentials)
-		onCreate?.()
-		messageApi.success('Realm создан')
+		createRealmMutation.mutate(values)
 	}
 
 	return (

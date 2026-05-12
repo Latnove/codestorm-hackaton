@@ -1,4 +1,3 @@
-export { EXTERNAL_LINKS } from './external'
 export {
 	buildRealmMiniappAccessRoute,
 	buildRealmMiniappCreateRoute,

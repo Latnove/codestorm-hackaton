@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 
 import {
 	buildDashboardChartData,
+	dashboardKeys,
 	getDashboardMetrics,
 } from '@/entities/dashboard'
 import { DashboardMetricsGrid } from '@/features/dashboard-metrics'
@@ -28,6 +29,18 @@ const formatUpdatedAt = (value: number) =>
 		: '—'
 
 const getErrorStatus = (error: unknown) => {
+	if (
+		typeof error === 'object' &&
+		error !== null &&
+		'response' in error &&
+		typeof (error as { response?: { status?: unknown } }).response?.status !==
+			'undefined'
+	) {
+		const status = Number((error as { response?: { status?: unknown } }).response?.status)
+
+		return Number.isNaN(status) ? undefined : status
+	}
+
 	if (typeof error !== 'object' || error === null || !('status' in error)) {
 		return undefined
 	}
@@ -51,6 +64,9 @@ const DashboardSkeleton = () => (
 )
 
 export const DashboardPage = () => {
+	const metricsParams = {
+		range: '10m',
+	}
 	const {
 		data: points = [],
 		dataUpdatedAt,
@@ -59,8 +75,8 @@ export const DashboardPage = () => {
 		isLoading,
 		refetch,
 	} = useQuery({
-		queryFn: getDashboardMetrics,
-		queryKey: ['dashboard-metrics'],
+		queryFn: () => getDashboardMetrics(metricsParams),
+		queryKey: dashboardKeys.metrics(metricsParams),
 		refetchInterval: 10_000,
 		placeholderData: previousData => previousData,
 	})
@@ -133,7 +149,7 @@ export const DashboardPage = () => {
 							Дашборд
 						</Title>
 						<Text className={styles.subtitle}>
-							Живые метрики, которые обновляются каждые 10 секунд
+							Статистика платформы, которая обновляется каждые 10 секунд
 						</Text>
 					</div>
 

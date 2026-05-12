@@ -1,14 +1,16 @@
 import {
 	platformUserStatusColors,
 	platformUserStatusLabels,
+	createPlatformUser,
+	mapRoleToCoreGlobalRole,
+	userKeys,
 	roleLabels,
 	Roles,
+	type PlatformUser,
 	type Role,
 } from '@/entities/user'
-import { useRealmsStore } from '@/features/realms'
-import { useUsersStore } from '@/features/users'
+import { getAdminRealms, realmKeys } from '@/entities/realm'
 import {
-	buildPlatformUser,
 	createUserSchema,
 	type CreateUserFormValues,
 } from '@/features/users/create-user'
@@ -17,8 +19,9 @@ import { ButtonField } from '@/shared/ui/ButtonField'
 import { InputField } from '@/shared/ui/InputField'
 import { SelectField } from '@/shared/ui/SelectField'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Card, message, Tag, Typography } from 'antd'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import styles from './CreateUserPage.module.css'
@@ -37,11 +40,32 @@ const statusOptions = [
 
 export const CreateUserPage = () => {
 	const navigate = useNavigate()
-	const realms = useRealmsStore(state => state.realms)
-	const createUser = useUsersStore(state => state.createUser)
-	const [createdUser, setCreatedUser] = useState<ReturnType<
-		typeof buildPlatformUser
-	> | null>(null)
+	const queryClient = useQueryClient()
+	const { data: realmsPage } = useQuery({
+		queryFn: () => getAdminRealms(),
+		queryKey: realmKeys.list(),
+	})
+	const realms = realmsPage?.items ?? []
+	const [createdUser, setCreatedUser] = useState<PlatformUser | null>(null)
+	const createUserMutation = useMutation({
+		mutationFn: (values: CreateUserFormValues) =>
+			createPlatformUser({
+				email: values.email.trim() || undefined,
+				globalRole: mapRoleToCoreGlobalRole(values.role),
+				password: values.password,
+				realmCode: values.realmCode || undefined,
+				status: values.status,
+				username: values.username.trim(),
+			}),
+		onSuccess: user => {
+			setCreatedUser(user)
+			void queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+			message.success(`Пользователь ${user.username} создан`)
+		},
+		onError: () => {
+			message.error('Не удалось создать пользователя')
+		},
+	})
 
 	const realmOptions = realms.map(realm => ({
 		label: `${realm.name} (${realm.code})`,
@@ -51,7 +75,9 @@ export const CreateUserPage = () => {
 	const {
 		control,
 		formState: { isDirty, isSubmitting, isValid },
+		getValues,
 		handleSubmit,
+		setValue,
 	} = useForm<CreateUserFormValues>({
 		defaultValues: {
 			confirmPassword: '',
@@ -66,12 +92,14 @@ export const CreateUserPage = () => {
 		resolver: zodResolver(createUserSchema),
 	})
 
-	const handleCreate = (values: CreateUserFormValues) => {
-		const user = buildPlatformUser(values)
+	useEffect(() => {
+		if (!getValues('realmCode') && realmOptions[0]?.value) {
+			setValue('realmCode', realmOptions[0].value)
+		}
+	}, [getValues, realmOptions, setValue])
 
-		createUser(user)
-		setCreatedUser(user)
-		message.success(`Пользователь ${user.username} создан`)
+	const handleCreate = (values: CreateUserFormValues) => {
+		createUserMutation.mutate(values)
 	}
 
 	const isCreated = Boolean(createdUser)
@@ -154,7 +182,7 @@ export const CreateUserPage = () => {
 							<ButtonField
 								disabled={isCreated || !isDirty || !isValid}
 								htmlType='submit'
-								loading={isSubmitting}
+								loading={isSubmitting || createUserMutation.isPending}
 								type='primary'
 							>
 								Создать

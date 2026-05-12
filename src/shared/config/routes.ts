@@ -17,8 +17,6 @@ export const ROUTES = {
 	REALM_ROLES: '/realms/:realmCode/roles',
 	REALM_ROLE_MAPPING: '/realms/:realmCode/role-mapping',
 	LAUNCH: '/launch/:miniappId',
-	ANALYTICS: '/analytics',
-	AUDIT_LOGS: '/audit-logs',
 	FORBIDDEN: '/forbidden',
 	NOT_FOUND: '/not-found',
 } as const

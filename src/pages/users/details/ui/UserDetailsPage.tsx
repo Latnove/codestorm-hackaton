@@ -1,19 +1,23 @@
 import {
 	platformUserStatusColors,
 	platformUserStatusLabels,
+	getPlatformUser,
+	updatePlatformUserAndAccess,
+	userKeys,
 	roleLabels,
 	Roles,
 	type PlatformUserStatus,
 	type Role,
 } from '@/entities/user'
-import { useRealmsStore } from '@/features/realms'
-import { useUsersStore } from '@/features/users'
+import { getAdminRealms, realmKeys } from '@/entities/realm'
 import { buildRealmOverviewRoute, ROUTES } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { InputField } from '@/shared/ui/InputField'
 import { SelectField } from '@/shared/ui/SelectField'
 import { UserManageActions } from '@/widgets/user-manage-actions'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, message, Tag, Typography } from 'antd'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import styles from './UserDetailsPage.module.css'
@@ -40,11 +44,17 @@ const formatDate = (value: string) => new Date(value).toLocaleString()
 
 export const UserDetailsPage = () => {
 	const { userId = '' } = useParams()
-	const user = useUsersStore(state =>
-		state.users.find(item => item.id === userId),
-	)
-	const realms = useRealmsStore(state => state.realms)
-	const updateUserAccess = useUsersStore(state => state.updateUserAccess)
+	const queryClient = useQueryClient()
+	const { data: user, isLoading: isUserLoading } = useQuery({
+		enabled: Boolean(userId),
+		queryFn: () => getPlatformUser(userId),
+		queryKey: userKeys.detail(userId),
+	})
+	const { data: realmsPage } = useQuery({
+		queryFn: () => getAdminRealms(),
+		queryKey: realmKeys.list(),
+	})
+	const realms = realmsPage?.items ?? []
 
 	const {
 		control: accessControl,
@@ -59,6 +69,36 @@ export const UserDetailsPage = () => {
 		},
 		mode: 'onBlur',
 	})
+	const updateUserMutation = useMutation({
+		mutationFn: (values: UserAccessForm) =>
+			user
+				? updatePlatformUserAndAccess(user, values)
+				: Promise.reject(new Error('User is required')),
+		onSuccess: updatedUser => {
+			void queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+			void queryClient.invalidateQueries({
+				queryKey: userKeys.detail(updatedUser.id),
+			})
+			message.success('Пользователь обновлён')
+		},
+		onError: () => {
+			message.error('Не удалось обновить пользователя')
+		},
+	})
+
+	useEffect(() => {
+		if (user) {
+			reset({
+				email: user.email,
+				role: user.role,
+				status: user.status,
+			})
+		}
+	}, [reset, user])
+
+	if (isUserLoading) {
+		return null
+	}
 
 	if (!user) {
 		return <Navigate to={ROUTES.NOT_FOUND} />
@@ -67,8 +107,7 @@ export const UserDetailsPage = () => {
 	const userRealm = realms.find(realm => realm.code === user.realmCode)
 
 	const handleUpdateAccess = (values: UserAccessForm) => {
-		updateUserAccess(user.id, values)
-		message.success('Пользователь обновлён')
+		updateUserMutation.mutate(values)
 	}
 
 	const handleReset = () => {
@@ -182,6 +221,7 @@ export const UserDetailsPage = () => {
 							<ButtonField
 								disabled={!isDirty || !isValid}
 								htmlType='submit'
+								loading={updateUserMutation.isPending}
 								type='primary'
 							>
 								Сохранить

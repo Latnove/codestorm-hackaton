@@ -1,85 +1,53 @@
+import { apiClient, buildQueryParams, unwrapData } from '@/shared/api'
+
 import type { DashboardMetricPoint } from '../model/types'
 
-const SNAPSHOT_INTERVAL_MS = 10_000
-const SNAPSHOT_COUNT = 10
-const MOCK_NETWORK_DELAY_MS = 250
-const mockStartedBucket = Math.floor(Date.now() / SNAPSHOT_INTERVAL_MS) - 48
-
-const baseTotals = {
-	hostTokensIssuedTotal: 180,
-	launchDeniedTotal: 18,
-	launchSuccessTotal: 1200,
-	ssoFailedTotal: 9,
-	ssoSuccessTotal: 1160,
+export type DashboardMetricsParams = {
+	miniAppCode?: string
+	range?: string
+	realmCode?: string
 }
 
-const getDelta = (
-	offset: number,
-	min: number,
-	range: number,
-	salt: number,
-) => min + ((offset * salt + Math.floor(offset / 3) * (salt + 2)) % range)
+type DashboardMetricsResponse =
+	| DashboardMetricPoint[]
+	| {
+			items: DashboardMetricPoint[]
+	  }
+	| {
+			points: DashboardMetricPoint[]
+	  }
 
-const buildTotal = (
-	offset: number,
-	base: number,
-	min: number,
-	range: number,
-	salt: number,
-) => {
-	let total = base
+export const dashboardKeys = {
+	all: ['dashboard'] as const,
+	metrics: (params?: DashboardMetricsParams) =>
+		[...dashboardKeys.all, 'metrics', params] as const,
+}
 
-	for (let index = 0; index <= offset; index += 1) {
-		total += getDelta(index, min, range, salt)
+const normalizeDashboardMetrics = (
+	response: DashboardMetricsResponse,
+): DashboardMetricPoint[] => {
+	if (Array.isArray(response)) {
+		return response
 	}
 
-	return total
-}
-
-const buildMockPoint = (bucket: number): DashboardMetricPoint => {
-	const offset = Math.max(0, bucket - mockStartedBucket)
-
-	return {
-		timestamp: new Date(bucket * SNAPSHOT_INTERVAL_MS).toISOString(),
-		launchSuccessTotal: buildTotal(
-			offset,
-			baseTotals.launchSuccessTotal,
-			7,
-			14,
-			5,
-		),
-		launchDeniedTotal: buildTotal(
-			offset,
-			baseTotals.launchDeniedTotal,
-			0,
-			4,
-			3,
-		),
-		ssoSuccessTotal: buildTotal(offset, baseTotals.ssoSuccessTotal, 6, 12, 7),
-		ssoFailedTotal: buildTotal(offset, baseTotals.ssoFailedTotal, 0, 3, 2),
-		hostTokensIssuedTotal: buildTotal(
-			offset,
-			baseTotals.hostTokensIssuedTotal,
-			1,
-			7,
-			4,
-		),
+	if ('points' in response) {
+		return response.points
 	}
+
+	return response.items
 }
 
-const getMockDashboardMetrics = (): DashboardMetricPoint[] => {
-	const currentBucket = Math.floor(Date.now() / SNAPSHOT_INTERVAL_MS)
-	const firstBucket = currentBucket - SNAPSHOT_COUNT + 1
-
-	return Array.from({ length: SNAPSHOT_COUNT }, (_, index) =>
-		buildMockPoint(firstBucket + index),
+export const getDashboardMetrics = async (
+	params?: DashboardMetricsParams,
+): Promise<DashboardMetricPoint[]> => {
+	const data = await unwrapData(
+		apiClient.get<DashboardMetricsResponse>(
+			'/api/admin/statistics/dashboard',
+			{
+				params: buildQueryParams(params),
+			},
+		),
 	)
-}
 
-export const getDashboardMetrics = async (): Promise<
-	DashboardMetricPoint[]
-> => {
-	await new Promise(resolve => setTimeout(resolve, MOCK_NETWORK_DELAY_MS))
-
-	return getMockDashboardMetrics()
+	return normalizeDashboardMetrics(data)
 }

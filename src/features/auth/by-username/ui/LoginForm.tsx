@@ -32,13 +32,17 @@ export const LoginForm = () => {
 		resolver: zodResolver(loginSchema),
 	})
 
-	const handleFinish = (values: LoginFormValues) => {
-		const authPayload = loginByUsername(values)
-		setAuth(authPayload)
-		messageApi.success('Вы успешно авторизовались')
-		navigate(
-			authPayload.user.role === Roles.ROOT ? ROUTES.REALMS : ROUTES.DASHBOARD,
-		)
+	const handleFinish = async (values: LoginFormValues) => {
+		try {
+			const authPayload = await loginByUsername(values)
+			setAuth(authPayload)
+			messageApi.success('Вы успешно авторизовались')
+			navigate(
+				authPayload.user.role === Roles.ROOT ? ROUTES.REALMS : ROUTES.DASHBOARD,
+			)
+		} catch {
+			messageApi.error('Не удалось авторизоваться')
+		}
 	}
 
 	return (
