@@ -4,7 +4,14 @@ import {
 	useUserState,
 	useUserStore,
 } from '@/entities/user'
-import { EXTERNAL_LINKS, ROUTES } from '@/shared/config'
+import {
+	ROUTES,
+	buildRealmMiniappCreateRoute,
+	buildRealmMiniappsRoute,
+	buildRealmOverviewRoute,
+	buildRealmRoleMappingRoute,
+	buildRealmRolesRoute,
+} from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { Logo } from '@/shared/ui/Logo'
 import { Layout } from 'antd'
@@ -15,21 +22,16 @@ import styles from './AppHeader.module.css'
 
 const { Header } = Layout
 
-type AdminNavItem =
-	| { label: string; route: string }
-	| { externalUrl: string; label: string }
+type AdminNavItem = { label: string; route: string }
 
-const navItems: AdminNavItem[] = [
+const navItems: AdminNavItem[] = [{ label: 'Дашборд', route: ROUTES.DASHBOARD }]
+
+const rootNavItems: AdminNavItem[] = [
 	{ label: 'Дашборд', route: ROUTES.DASHBOARD },
-	{ label: 'Mini-Apps', route: ROUTES.MINIAPPS },
-	{ externalUrl: EXTERNAL_LINKS.GRAFANA_ANALYTICS, label: 'Аналитика' },
-	{ externalUrl: EXTERNAL_LINKS.GRAFANA_LOGS, label: 'Логи' },
-]
-
-const rootNavItems = [
 	{ label: 'Users', route: ROUTES.USERS },
 	{ label: 'Realms', route: ROUTES.REALMS },
 	{ label: 'Создать Realm', route: ROUTES.REALM_CREATE },
+	{ label: 'Создать User', route: ROUTES.USER_CREATE },
 ]
 
 export const AppHeader = () => {
@@ -37,18 +39,73 @@ export const AppHeader = () => {
 	const navigate = useNavigate()
 	const { user } = useUserStore(useShallow(useUserState))
 	const { logout } = useUserStore(useShallow(useUserActions))
+	const isRoot = user?.role === Roles.ROOT
+	const userRealmCode = !isRoot ? user?.realmCode : undefined
+	const adminNavItems = userRealmCode
+		? [
+				navItems[0],
+				{
+					label: 'Управление ролями',
+					route: buildRealmRolesRoute(userRealmCode),
+				},
+				{
+					label: 'Mapping ролей',
+					route: buildRealmRoleMappingRoute(userRealmCode),
+				},
+				{
+					label: 'Mini-Apps',
+					route: buildRealmMiniappsRoute(userRealmCode),
+				},
+				{
+					label: 'Создать Mini-Apps',
+					route: buildRealmMiniappCreateRoute(userRealmCode),
+				},
+			]
+		: navItems
+	const adminRealmCode = userRealmCode
 
 	const isRouteActive = (route: string) => {
+		const realmMiniappsRoute = userRealmCode
+			? buildRealmMiniappsRoute(userRealmCode)
+			: undefined
+		const realmMiniappCreateRoute = userRealmCode
+			? buildRealmMiniappCreateRoute(userRealmCode)
+			: undefined
+
 		if (route === ROUTES.DASHBOARD) {
 			return location.pathname === route
 		}
 
 		if (route === ROUTES.REALMS) {
+			if (user?.role === Roles.ADMIN) {
+				return location.pathname === ROUTES.REALMS
+			}
+
 			return (
 				location.pathname === ROUTES.REALMS ||
 				(location.pathname.startsWith('/realms/') &&
 					location.pathname !== ROUTES.REALM_CREATE)
 			)
+		}
+
+		if (route === ROUTES.USERS) {
+			return (
+				location.pathname === ROUTES.USERS ||
+				(location.pathname.startsWith('/users/') &&
+					location.pathname !== ROUTES.USER_CREATE)
+			)
+		}
+
+		if (realmMiniappsRoute && route === realmMiniappsRoute) {
+			return (
+				location.pathname === realmMiniappsRoute ||
+				(location.pathname.startsWith(`${realmMiniappsRoute}/`) &&
+					location.pathname !== realmMiniappCreateRoute)
+			)
+		}
+
+		if (realmMiniappCreateRoute && route === realmMiniappCreateRoute) {
+			return location.pathname === realmMiniappCreateRoute
 		}
 
 		return location.pathname.startsWith(route)
@@ -68,7 +125,7 @@ export const AppHeader = () => {
 			<div className={clsx('container', styles.inner)}>
 				<Logo onClick={navigateHome} />
 
-				{user?.role === Roles.ROOT ? (
+				{isRoot ? (
 					<nav className={styles.nav}>
 						{rootNavItems.map(item => (
 							<ButtonField
@@ -90,17 +147,10 @@ export const AppHeader = () => {
 					</nav>
 				) : user ? (
 					<nav className={styles.nav}>
-						{navItems.map(item => (
+						{adminNavItems.map(item => (
 							<ButtonField
 								key={item.label}
-								onClick={() => {
-									if ('externalUrl' in item) {
-										window.location.assign(item.externalUrl)
-										return
-									}
-
-									navigate(item.route)
-								}}
+								onClick={() => navigate(item.route)}
 								type={
 									'route' in item && isRouteActive(item.route)
 										? 'primary'
@@ -111,13 +161,17 @@ export const AppHeader = () => {
 							</ButtonField>
 						))}
 
-						<ButtonField
-							className={styles.profileButton}
-							onClick={() => navigate(ROUTES.SETTINGS)}
-							type='default'
-						>
-							Профиль
-						</ButtonField>
+						{adminRealmCode && (
+							<ButtonField
+								className={styles.profileButton}
+								onClick={() =>
+									navigate(buildRealmOverviewRoute(adminRealmCode))
+								}
+								type='default'
+							>
+								Мой Realm
+							</ButtonField>
+						)}
 					</nav>
 				) : (
 					<ButtonField onClick={() => navigate(ROUTES.LOGIN)} type='primary'>

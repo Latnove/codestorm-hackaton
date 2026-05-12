@@ -5,7 +5,7 @@ const { Title } = Typography
 
 export const SettingsPage = () => {
   return (
-    <Card>
+    <Card className="container">
       <Title level={1}>Settings</Title>
       <Descriptions
         bordered

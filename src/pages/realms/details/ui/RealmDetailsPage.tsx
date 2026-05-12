@@ -1,7 +1,6 @@
 import { Roles, useUserStore } from '@/entities/user'
 import { useRealmsStore } from '@/features/realms/realms-catalog/model'
 import { ROUTES } from '@/shared/config'
-import { RealmManageActions } from '@/widgets/realm-manage-actions'
 import { RealmOverview } from '@/widgets/realm-overview'
 import { RealmUsersList } from '@/widgets/realm-users-list'
 import Text from 'antd/es/typography/Text'
@@ -21,7 +20,6 @@ export const RealmDetailsPage = () => {
 	}
 
 	const isRoot = user?.role === Roles.ROOT
-	const canEditUsers = user?.role === Roles.ROOT || user?.role === Roles.ADMIN
 
 	return (
 		<div className={'container'}>
@@ -35,24 +33,9 @@ export const RealmDetailsPage = () => {
 			</div>
 
 			<div className={styles.content}>
-				<RealmOverview
-					manageActions={
-						isRoot ? (
-							<RealmManageActions
-								afterDeletePath={ROUTES.REALMS}
-								realm={realm}
-								variant='inline'
-							/>
-						) : null
-					}
-					realm={realm}
-				/>
+				<RealmOverview realm={realm} isRoot={isRoot} />
 
-				<RealmUsersList
-					canCreateUser={isRoot}
-					canEditUsers={canEditUsers}
-					realmCode={realm.code}
-				/>
+				{isRoot && <RealmUsersList realmCode={realm.code} />}
 			</div>
 		</div>
 	)

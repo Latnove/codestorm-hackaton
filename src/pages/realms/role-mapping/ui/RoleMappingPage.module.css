@@ -1,0 +1,50 @@
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px;
+}
+
+.mainTitle {
+	margin: 0 !important;
+}
+
+.info {
+	border-color: #cfe0ff;
+	background: #f8fbff;
+}
+
+.card {
+	border: 1px solid #e8eef8;
+	background: #ffffff;
+	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.cardHeader {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 18px;
+}
+
+.sectionTitle {
+	margin-bottom: 4px !important;
+}
+
+@media (width <= 720px) {
+	.header,
+	.cardHeader {
+		flex-direction: column;
+	}
+
+	.header :global(.ant-space) {
+		width: 100%;
+	}
+}

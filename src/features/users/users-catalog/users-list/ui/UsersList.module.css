@@ -41,16 +41,26 @@
 	background: #eef4ff;
 	color: #2451d6;
 	font-size: 12px;
-	font-weight: 800;
+	font-weight: 500;
 }
 
 .username {
 	color: #18253f;
-	font-weight: 700;
+	font-weight: 600;
 }
 
 .roles {
 	row-gap: 6px;
+}
+
+.realmLink {
+	color: #2451d6;
+	font-weight: 500;
+}
+
+.realmLink:hover {
+	color: #173fb7;
+	text-decoration: underline;
 }
 
 .actions {

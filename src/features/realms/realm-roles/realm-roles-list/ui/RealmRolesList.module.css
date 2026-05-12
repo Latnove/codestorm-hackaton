@@ -1,0 +1,33 @@
+.table {
+	overflow: hidden;
+	border: 1px solid #e6edf7;
+	border-radius: 18px;
+}
+
+.table :global(.ant-table-thead > tr > th) {
+	border-bottom: 1px solid #e6edf7;
+	background: #f8fbff;
+	color: #526175;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.table :global(.ant-table-tbody > tr > td) {
+	border-bottom: 1px solid #eef3fb;
+	color: #26364f;
+}
+
+.table :global(.ant-table-tbody > tr:hover > td) {
+	background: #f8fbff !important;
+}
+
+.name {
+	color: #18253f;
+	font-weight: 600;
+}
+
+.empty {
+	padding: 32px;
+}

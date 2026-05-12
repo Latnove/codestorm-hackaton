@@ -1,0 +1,77 @@
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.table {
+	overflow: hidden;
+	border: 1px solid #e6edf7;
+	border-radius: 18px;
+}
+
+.table :global(.ant-table) {
+	table-layout: fixed;
+}
+
+.table :global(.ant-table-thead > tr > th) {
+	border-bottom: 1px solid #e6edf7;
+	background: #f8fbff;
+	color: #526175;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.table :global(.ant-table-tbody > tr > td) {
+	border-bottom: 1px solid #eef3fb;
+	color: #26364f;
+}
+
+.table :global(.ant-table-tbody > tr:hover > td) {
+	background: #f8fbff !important;
+}
+
+.externalRole {
+	display: inline-block;
+	max-width: 100%;
+	color: #18253f;
+	font-weight: 700;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.control {
+	width: 100%;
+	height: 30px !important;
+}
+
+.editActions {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 176px;
+}
+
+.editActions :global(.ant-btn) {
+	min-width: 82px;
+}
+
+@media (width <= 720px) {
+	.toolbar {
+		justify-content: stretch;
+	}
+
+	.toolbar :global(.ant-btn) {
+		width: 100%;
+	}
+}

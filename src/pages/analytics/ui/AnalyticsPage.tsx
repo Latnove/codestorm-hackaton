@@ -36,7 +36,7 @@ export const AnalyticsPage = () => {
   ]
 
   return (
-    <Space direction="vertical" size={20} style={{ width: '100%' }}>
+    <Space className="container" direction="vertical" size={20} style={{ width: '100%' }}>
       <Title level={1}>Analytics</Title>
       <Row gutter={[16, 16]}>
         <Col lg={6} sm={12} xs={24}>

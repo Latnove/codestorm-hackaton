@@ -21,7 +21,8 @@ const initialState: IUserState = {
 	user: {
 		id: 'string',
 		username: 'string',
-		role: Roles.ROOT,
+		role: Roles.ADMIN,
+		realmCode: 'bank-mobile',
 		serviceName: 'sfsdfsdf',
 		createdAt: 'sddsfsdf',
 	},

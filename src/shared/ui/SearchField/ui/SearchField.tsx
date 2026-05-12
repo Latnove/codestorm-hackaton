@@ -11,7 +11,7 @@ import styles from './SearchField.module.css'
 
 const { Text } = Typography
 
-type SearchFieldProps<TValues extends FieldValues> = {
+interface ISearchFieldProps<TValues extends FieldValues> extends SearchProps {
 	control: Control<TValues>
 	name: FieldPath<TValues>
 	label: string
@@ -27,7 +27,8 @@ export const SearchField = <TValues extends FieldValues>({
 	label,
 	name,
 	placeholder,
-}: SearchFieldProps<TValues>) => {
+	...props
+}: ISearchFieldProps<TValues>) => {
 	return (
 		<Controller
 			control={control}
@@ -35,20 +36,20 @@ export const SearchField = <TValues extends FieldValues>({
 			render={({ field, fieldState }) => {
 				const hasError = Boolean(fieldState.error?.message)
 
-				const props: SearchProps = {
+				const allProps: SearchProps = {
 					allowClear,
 					className: styles.search,
 					placeholder,
-					size: 'large',
 					status: hasError ? 'error' : undefined,
 					...field,
+					...props,
 				}
 
 				return (
 					<label className={styles.field}>
 						<span className={styles.label}>{label}</span>
 
-						<Input.Search {...props} />
+						<Input.Search {...allProps} />
 
 						{hasError ? (
 							<Text className={styles.error}>{fieldState.error?.message}</Text>

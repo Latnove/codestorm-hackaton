@@ -10,14 +10,9 @@ export const buildPlatformUser = (
 	return {
 		createdAt: now,
 		email: values.email.trim(),
-		globalRoles: values.globalRoles,
 		id,
-		realmRoles: [
-			{
-				realmCode: values.realmCode,
-				roles: values.realmRoles,
-			},
-		],
+		realmCode: values.realmCode,
+		role: values.role,
 		status: values.status,
 		updatedAt: now,
 		username: values.username.trim(),

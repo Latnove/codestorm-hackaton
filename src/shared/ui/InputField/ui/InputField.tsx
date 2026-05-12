@@ -11,7 +11,7 @@ import styles from './InputField.module.css'
 
 const { Text } = Typography
 
-type InputFieldProps<TValues extends FieldValues> = {
+interface InputFieldProps<TValues extends FieldValues> extends InputProps {
 	control: Control<TValues>
 	name: FieldPath<TValues>
 	label: string
@@ -31,6 +31,7 @@ export const InputField = <TValues extends FieldValues>({
 	name,
 	placeholder,
 	type = 'text',
+	...props
 }: InputFieldProps<TValues>) => {
 	return (
 		<Controller
@@ -47,6 +48,7 @@ export const InputField = <TValues extends FieldValues>({
 					size: 'large',
 					status: hasError ? 'error' : undefined,
 					...field,
+					...props,
 				}
 
 				return (

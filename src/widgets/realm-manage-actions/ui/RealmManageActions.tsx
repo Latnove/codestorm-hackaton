@@ -57,9 +57,7 @@ export const RealmManageActions = ({
 
 	if (variant === 'inline') {
 		return (
-			<div className={clsx(styles.inline, className)}>
-				{renderActions()}
-			</div>
+			<div className={clsx(styles.inline, className)}>{renderActions()}</div>
 		)
 	}
 

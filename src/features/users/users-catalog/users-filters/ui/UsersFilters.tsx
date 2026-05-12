@@ -1,5 +1,6 @@
 import {
 	Roles,
+	platformUserStatusLabels,
 	roleLabels,
 	type PlatformUserStatus,
 	type Role,
@@ -31,16 +32,16 @@ const statusOptions: {
 	label: string
 	value: PlatformUserStatus | 'ALL'
 }[] = [
-	{ label: 'All statuses', value: 'ALL' },
-	{ label: 'Active', value: 'active' },
-	{ label: 'Blocked', value: 'blocked' },
+	{ label: 'Все статусы', value: 'ALL' },
+	{ label: platformUserStatusLabels.active, value: 'active' },
+	{ label: platformUserStatusLabels.disable, value: 'disable' },
 ]
 
 const roleOptions: {
 	label: string
 	value: Role | 'ALL'
 }[] = [
-	{ label: 'All roles', value: 'ALL' },
+	{ label: 'Все роли', value: 'ALL' },
 	{ label: roleLabels[Roles.ROOT], value: Roles.ROOT },
 	{ label: roleLabels[Roles.ADMIN], value: Roles.ADMIN },
 	{ label: roleLabels[Roles.READONLY], value: Roles.READONLY },
@@ -77,9 +78,10 @@ export const UsersFilters = ({ className }: UsersFiltersProps) => {
 			<div className={styles.search}>
 				<SearchField
 					control={control}
-					label='Search'
+					label='Поиск'
 					name='search'
-					placeholder='Search by username/email'
+					placeholder='Поиск по username/email'
+					size='medium'
 				/>
 			</div>
 
@@ -89,17 +91,19 @@ export const UsersFilters = ({ className }: UsersFiltersProps) => {
 					label='Статус'
 					name='status'
 					options={statusOptions}
-					placeholder='Status'
+					placeholder='Статус'
+					size='medium'
 				/>
 			</div>
 
 			<div className={styles.filter}>
 				<SelectField<UsersFiltersForm, Role | 'ALL'>
 					control={control}
-					label='Global role'
+					label='Роль'
 					name='globalRole'
 					options={roleOptions}
-					placeholder='Global role'
+					placeholder='Роль'
+					size='medium'
 				/>
 			</div>
 		</div>

@@ -1,53 +1,162 @@
-import { mockAnalyticsEvents } from '@/entities/analytics'
-import { mockAuditLogs } from '@/entities/audit-log'
-import { mockMiniapps } from '@/entities/miniapp'
-import { ROUTES } from '@/shared/config'
-import { Button, Card, Col, List, Row, Space, Statistic, Typography } from 'antd'
-import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { Alert, Button, Card, Empty, Result, Skeleton, Typography } from 'antd'
+import { useMemo } from 'react'
+
+import {
+	buildDashboardChartData,
+	getDashboardMetrics,
+} from '@/entities/dashboard'
+import { DashboardMetricsGrid } from '@/features/dashboard-metrics'
+import {
+	HostTokensDeltaChart,
+	LaunchesDeltaChart,
+	SsoDeltaChart,
+	TotalsOverviewChart,
+} from '@/widgets/dashboard-charts'
+
+import styles from './DashboardPage.module.css'
 
 const { Text, Title } = Typography
 
+const formatUpdatedAt = (value: number) =>
+	value
+		? new Date(value).toLocaleTimeString('ru-RU', {
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit',
+			})
+		: '—'
+
+const getErrorStatus = (error: unknown) => {
+	if (typeof error !== 'object' || error === null || !('status' in error)) {
+		return undefined
+	}
+
+	const status = Number((error as { status?: unknown }).status)
+
+	return Number.isNaN(status) ? undefined : status
+}
+
+const DashboardSkeleton = () => (
+	<>
+		<DashboardMetricsGrid loading />
+		<div className={styles.chartsGrid}>
+			{Array.from({ length: 4 }, (_, index) => (
+				<Card className={styles.skeletonCard} key={index}>
+					<Skeleton active paragraph={{ rows: 8 }} />
+				</Card>
+			))}
+		</div>
+	</>
+)
+
 export const DashboardPage = () => {
-  return (
-    <Space direction="vertical" size={24} style={{ width: '100%' }}>
-      <Row align="middle" justify="space-between" gutter={[16, 16]}>
-        <Col>
-          <Text type="secondary">Overview</Text>
-          <Title level={1}>Dashboard</Title>
-        </Col>
-        <Col>
-          <Link to={ROUTES.MINIAPP_CREATE}>
-            <Button type="primary">Create miniapp</Button>
-          </Link>
-        </Col>
-      </Row>
+	const {
+		data: points = [],
+		dataUpdatedAt,
+		error,
+		isError,
+		isLoading,
+		refetch,
+	} = useQuery({
+		queryFn: getDashboardMetrics,
+		queryKey: ['dashboard-metrics'],
+		refetchInterval: 10_000,
+		placeholderData: previousData => previousData,
+	})
 
-      <Row gutter={[16, 16]}>
-        <Col lg={4} sm={12} xs={24}><Card><Statistic title="Total miniapps" value={mockMiniapps.length} /></Card></Col>
-        <Col lg={4} sm={12} xs={24}><Card><Statistic title="Published" value={mockMiniapps.filter((item) => item.status === 'published').length} /></Card></Col>
-        <Col lg={4} sm={12} xs={24}><Card><Statistic title="Draft" value={mockMiniapps.filter((item) => item.status === 'draft').length} /></Card></Col>
-        <Col lg={4} sm={12} xs={24}><Card><Statistic title="Disabled" value={mockMiniapps.filter((item) => item.status === 'disabled').length} /></Card></Col>
-        <Col lg={4} sm={12} xs={24}><Card><Statistic title="Launches today" value={mockAnalyticsEvents.length} /></Card></Col>
-        <Col lg={4} sm={12} xs={24}><Card><Statistic title="Errors" value={mockAnalyticsEvents.filter((event) => event.event === 'error').length} /></Card></Col>
-      </Row>
+	const chartData = useMemo(() => buildDashboardChartData(points), [points])
+	const latest = points.at(-1)
+	const hasPoints = points.length > 0
+	const errorStatus = getErrorStatus(error)
+	const isForbidden = errorStatus === 403
+	const isInitialLoading = isLoading && !hasPoints
+	const isFirstLoadError = isError && !hasPoints
+	const isPollingError = isError && hasPoints
 
-      <Row gutter={[16, 16]}>
-        <Col lg={8} xs={24}>
-          <Card title="Последние miniapp">
-            <List dataSource={mockMiniapps.slice(0, 5)} renderItem={(item) => <List.Item>{item.name}</List.Item>} />
-          </Card>
-        </Col>
-        <Col lg={8} xs={24}>
-          <Card title="Последние действия">
-            <List dataSource={mockAuditLogs.slice(0, 5)} renderItem={(item) => <List.Item>{item.action} · {item.entityName}</List.Item>} />
-          </Card>
-        </Col>
-        <Col lg={8} xs={24}>
-          <Card title="Топ miniapp">
-            <List dataSource={mockMiniapps.slice(0, 5)} renderItem={(item) => <List.Item>{item.name}</List.Item>} />
-          </Card>
-        </Col>
-      </Row>
-    </Space>
-  )
+	const renderContent = () => {
+		if (isInitialLoading) {
+			return <DashboardSkeleton />
+		}
+
+		if (isForbidden && !hasPoints) {
+			return (
+				<Card className={styles.stateCard}>
+					<Result status='403' title='Нет доступа к дашборду' />
+				</Card>
+			)
+		}
+
+		if (isFirstLoadError) {
+			return (
+				<Card className={styles.stateCard}>
+					<Result
+						extra={
+							<Button onClick={() => void refetch()} type='primary'>
+								Повторить
+							</Button>
+						}
+						status='error'
+						title='Не удалось загрузить метрики'
+					/>
+				</Card>
+			)
+		}
+
+		if (!latest) {
+			return (
+				<Card className={styles.stateCard}>
+					<Empty description='Нет данных для отображения' />
+				</Card>
+			)
+		}
+
+		return (
+			<>
+				<DashboardMetricsGrid latest={latest} />
+				<div className={styles.chartsGrid}>
+					<LaunchesDeltaChart data={chartData} />
+					<SsoDeltaChart data={chartData} />
+					<HostTokensDeltaChart data={chartData} />
+					<TotalsOverviewChart latest={latest} />
+				</div>
+			</>
+		)
+	}
+
+	return (
+		<div className='container'>
+			<div className={styles.wrapper}>
+				<div className={styles.header}>
+					<div>
+						<Title className={styles.title} level={1}>
+							Дашборд
+						</Title>
+						<Text className={styles.subtitle}>
+							Живые метрики, которые обновляются каждые 10 секунд
+						</Text>
+					</div>
+
+					<div className={styles.updatedAt}>
+						<Text type='secondary'>Обновлено</Text>
+						<Text strong>{formatUpdatedAt(dataUpdatedAt)}</Text>
+					</div>
+				</div>
+
+				{isPollingError && (
+					<Alert
+						message={
+							isForbidden
+								? 'Нет доступа к дашборду'
+								: 'Не удалось обновить данные. Показываются последние доступные значения.'
+						}
+						showIcon
+						type={isForbidden ? 'error' : 'warning'}
+					/>
+				)}
+
+				{renderContent()}
+			</div>
+		</div>
+	)
 }

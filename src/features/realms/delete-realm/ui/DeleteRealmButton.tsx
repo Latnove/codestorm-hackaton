@@ -47,10 +47,7 @@ export const DeleteRealmButton = ({
 			onConfirm={handleDelete}
 			title='Удалить Realm?'
 		>
-			<ButtonField
-				danger
-				type={variant === 'menu-item' ? 'text' : 'default'}
-			>
+			<ButtonField danger type={variant === 'menu-item' ? 'text' : 'default'}>
 				Удалить
 			</ButtonField>
 		</DeleteConfirm>

@@ -22,7 +22,7 @@ export const AuditLogsPage = () => {
   ]
 
   return (
-    <Card>
+    <Card className="container">
       <Title level={1}>Audit logs</Title>
       <Table<AuditLog>
         columns={columns}

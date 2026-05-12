@@ -6,17 +6,26 @@
 .label {
 	color: #26364f;
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 500;
 }
 
 .select {
+	height: 42px;
 	width: 100%;
+	background: #fff !important;
+	border: 1px solid #dfe7f6 !important;
+	border-radius: 8px !important;
 }
 
 .select :global(.ant-select-selector) {
-	border-color: #dfe7f6 !important;
-	background: #fbfdff !important;
+	background: #fff !important;
 	box-shadow: 0 10px 24px rgb(95 119 168 / 6%) !important;
+}
+
+:global(.rc-virtual-list-holder-inner) {
+	display: flex;
+	flex-direction: column;
+	gap: 4px !important;
 }
 
 .select:hover :global(.ant-select-selector),

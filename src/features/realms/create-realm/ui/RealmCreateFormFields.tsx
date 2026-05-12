@@ -52,6 +52,7 @@ export const RealmCreateFormFields: FC<RealmCreateFormFieldsProps> = ({
 					label='Код'
 					name='code'
 					placeholder='bank-mobile'
+					size='medium'
 				/>
 
 				<InputField
@@ -61,6 +62,7 @@ export const RealmCreateFormFields: FC<RealmCreateFormFieldsProps> = ({
 					name='name'
 					placeholder='Bank Mobile'
 					hint='Например: Bank Mobile'
+					size='medium'
 				/>
 
 				<TextAreaField

@@ -1,0 +1,35 @@
+.card {
+	height: 100%;
+	border: 1px solid #e8eef8;
+	background: #ffffff;
+	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.card :global(.ant-card-body) {
+	display: flex;
+	justify-content: space-between;
+	flex-direction: column;
+	gap: 16px;
+	min-height: 128px;
+	padding: 20px;
+}
+
+.title {
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.35;
+	text-transform: uppercase;
+}
+
+.value {
+	color: #18253f;
+	font-size: 30px;
+	font-weight: 600;
+	line-height: 1;
+	overflow-wrap: anywhere;
+}
+
+.skeleton {
+	max-width: 160px;
+}

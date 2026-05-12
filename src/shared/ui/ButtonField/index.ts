@@ -1,1 +1,1 @@
-export { ButtonField } from './ui/ButtonField'
+export { ButtonField, type ButtonFieldProps } from './ui/ButtonField'

@@ -1,26 +1,29 @@
 .field {
-	display: grid;
 	gap: 8px;
+	display: flex;
+	flex-direction: column;
 }
 
 .label {
 	color: #26364f;
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 500;
 }
 
 .input {
-	border-color: #dfe7f6;
-	background: #fbfdff;
-	box-shadow: 0 10px 24px rgb(95 119 168 / 6%);
+	height: 40px !important;
+	border: 1px solid #dfe7f6 !important;
+	border-radius: 8px !important;
+	background-color: #ffffff !important;
+	box-shadow: none !important;
 }
 
 .input:hover,
 .input:focus,
 .input:focus-within {
-	border-color: #8fa5ff;
-	background: #fff;
-	box-shadow: 0 0 0 3px rgb(93 124 245 / 12%);
+	border: 1px solid #8fa5ff !important;
+	background-color: #ffffff !important;
+	box-shadow: 0 0 0 3px rgb(93 124 245 / 10%) !important;
 }
 
 .hint,

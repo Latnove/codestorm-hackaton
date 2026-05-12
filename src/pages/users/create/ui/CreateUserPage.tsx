@@ -1,17 +1,24 @@
-import { roleLabels, Roles, type Role } from '@/entities/user'
+import {
+	platformUserStatusColors,
+	platformUserStatusLabels,
+	roleLabels,
+	Roles,
+	type Role,
+} from '@/entities/user'
 import { useRealmsStore } from '@/features/realms'
+import { useUsersStore } from '@/features/users'
 import {
 	buildPlatformUser,
 	createUserSchema,
 	type CreateUserFormValues,
 } from '@/features/users/create-user'
-import { useUsersStore } from '@/features/users'
 import { buildUserRoute, ROUTES } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { InputField } from '@/shared/ui/InputField'
 import { SelectField } from '@/shared/ui/SelectField'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Card, Typography, message } from 'antd'
+import { Alert, Card, message, Tag, Typography } from 'antd'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import styles from './CreateUserPage.module.css'
@@ -24,14 +31,17 @@ const roleOptions = [Roles.ROOT, Roles.ADMIN, Roles.READONLY].map(role => ({
 }))
 
 const statusOptions = [
-	{ label: 'Active', value: 'active' },
-	{ label: 'Blocked', value: 'blocked' },
+	{ label: platformUserStatusLabels.active, value: 'active' },
+	{ label: platformUserStatusLabels.disable, value: 'disable' },
 ]
 
 export const CreateUserPage = () => {
 	const navigate = useNavigate()
 	const realms = useRealmsStore(state => state.realms)
 	const createUser = useUsersStore(state => state.createUser)
+	const [createdUser, setCreatedUser] = useState<ReturnType<
+		typeof buildPlatformUser
+	> | null>(null)
 
 	const realmOptions = realms.map(realm => ({
 		label: `${realm.name} (${realm.code})`,
@@ -40,16 +50,15 @@ export const CreateUserPage = () => {
 
 	const {
 		control,
-		formState: { isSubmitting },
+		formState: { isDirty, isSubmitting, isValid },
 		handleSubmit,
 	} = useForm<CreateUserFormValues>({
 		defaultValues: {
 			confirmPassword: '',
 			email: '',
-			globalRoles: [Roles.ADMIN],
 			password: '',
 			realmCode: realmOptions[0]?.value ?? '',
-			realmRoles: [Roles.ADMIN],
+			role: Roles.ADMIN,
 			status: 'active',
 			username: '',
 		},
@@ -61,90 +70,163 @@ export const CreateUserPage = () => {
 		const user = buildPlatformUser(values)
 
 		createUser(user)
+		setCreatedUser(user)
 		message.success(`Пользователь ${user.username} создан`)
-		navigate(buildUserRoute(user.id))
 	}
 
+	const isCreated = Boolean(createdUser)
+	const createdUserRealm = realms.find(
+		realm => realm.code === createdUser?.realmCode,
+	)
+
 	return (
-		<div className={styles.wrapper}>
-			<Card className={styles.card}>
-				<div className={styles.header}>
-					<Text type='secondary'>Platform users</Text>
-					<Title level={1}>Создать пользователя</Title>
-				</div>
-
-				<form className={styles.form} onSubmit={handleSubmit(handleCreate)}>
-					<InputField
-						control={control}
-						label='Username'
-						name='username'
-						placeholder='ivan.petrov'
-					/>
-					<InputField
-						control={control}
-						label='Email'
-						name='email'
-						placeholder='ivan.petrov@example.com'
-					/>
-					<InputField
-						control={control}
-						label='Password'
-						name='password'
-						placeholder='Минимум 6 символов'
-						type='password'
-					/>
-					<InputField
-						control={control}
-						label='Confirm password'
-						name='confirmPassword'
-						placeholder='Повторите пароль'
-						type='password'
-					/>
-					<SelectField<CreateUserFormValues, Role[]>
-						control={control}
-						label='Global roles'
-						mode='multiple'
-						name='globalRoles'
-						options={roleOptions}
-						placeholder='Выберите роли'
-					/>
-					<SelectField<CreateUserFormValues, CreateUserFormValues['status']>
-						control={control}
-						label='Status'
-						name='status'
-						options={statusOptions}
-						placeholder='Status'
-					/>
-					<div className={styles.wide}>
-						<SelectField<CreateUserFormValues, string>
-							control={control}
-							label='Realm'
-							name='realmCode'
-							options={realmOptions}
-							placeholder='Выберите Realm'
-						/>
+		<div className='container'>
+			<div className={isCreated ? styles.layoutCreated : styles.layout}>
+				<Card className={styles.formCard}>
+					<div className={styles.header}>
+						<Title level={1}>Создать пользователя</Title>
 					</div>
-					<div className={styles.wide}>
-						<SelectField<CreateUserFormValues, Role[]>
+
+					<form className={styles.form} onSubmit={handleSubmit(handleCreate)}>
+						<InputField
 							control={control}
-							label='Roles in Realm'
-							mode='multiple'
-							name='realmRoles'
+							disabled={isCreated}
+							label='Username'
+							name='username'
+							placeholder='ivan.petrov'
+							size='medium'
+						/>
+						<InputField
+							control={control}
+							disabled={isCreated}
+							label='Email'
+							name='email'
+							placeholder='ivan.petrov@example.com'
+							size='medium'
+						/>
+						<InputField
+							control={control}
+							disabled={isCreated}
+							label='Password'
+							name='password'
+							placeholder='Минимум 6 символов'
+							size='medium'
+							type='password'
+						/>
+						<InputField
+							control={control}
+							disabled={isCreated}
+							label='Confirm password'
+							name='confirmPassword'
+							placeholder='Повторите пароль'
+							size='medium'
+							type='password'
+						/>
+						<SelectField<CreateUserFormValues, Role>
+							control={control}
+							disabled={isCreated}
+							label='Роль'
+							name='role'
 							options={roleOptions}
-							placeholder='Выберите роли'
+							placeholder='Выберите роль'
 						/>
+						<SelectField<CreateUserFormValues, CreateUserFormValues['status']>
+							control={control}
+							disabled={isCreated}
+							label='Статус'
+							name='status'
+							options={statusOptions}
+							placeholder='Выберите статус'
+							size='medium'
+						/>
+						<div className={styles.wide}>
+							<SelectField<CreateUserFormValues, string>
+								control={control}
+								disabled={isCreated}
+								label='Realm'
+								name='realmCode'
+								options={realmOptions}
+								placeholder='Выберите Realm'
+								size='medium'
+							/>
+						</div>
+						<div className={styles.submitRow}>
+							<ButtonField
+								disabled={isCreated || !isDirty || !isValid}
+								htmlType='submit'
+								loading={isSubmitting}
+								type='primary'
+							>
+								Создать
+							</ButtonField>
+							{!isCreated && (
+								<ButtonField onClick={() => navigate(ROUTES.USERS)}>
+									Отмена
+								</ButtonField>
+							)}
+						</div>
+					</form>
+				</Card>
+
+				{createdUser && (
+					<Card className={styles.resultCard}>
+						<div className={styles.header}>
+							<Title level={3}>Пользователь создан</Title>
+							<Text type='secondary'>
+								Проверьте данные перед переходом в профиль
+							</Text>
 					</div>
 
-					<div className={styles.submitRow}>
-						<ButtonField htmlType='submit' loading={isSubmitting} type='primary'>
-							Создать
-						</ButtonField>
+					<Alert
+						className={styles.alert}
+						description='Поля формы заблокированы до выхода со страницы, чтобы данные создания остались на экране.'
+						showIcon
+						type='success'
+					/>
+
+					<div className={styles.resultList}>
+						<div className={styles.resultRow}>
+							<Text className={styles.resultLabel}>Username</Text>
+							<Text className={styles.resultValue}>{createdUser.username}</Text>
+						</div>
+						<div className={styles.resultRow}>
+							<Text className={styles.resultLabel}>Email</Text>
+							<Text className={styles.resultValue}>{createdUser.email}</Text>
+						</div>
+						<div className={styles.resultRow}>
+							<Text className={styles.resultLabel}>Статус</Text>
+							<Tag color={platformUserStatusColors[createdUser.status]}>
+								{platformUserStatusLabels[createdUser.status]}
+							</Tag>
+						</div>
+						<div className={styles.resultRow}>
+							<Text className={styles.resultLabel}>Роль</Text>
+							<Tag color='geekblue'>{roleLabels[createdUser.role]}</Tag>
+						</div>
+						<div className={styles.resultRow}>
+							<Text className={styles.resultLabel}>Realm</Text>
+							<Text className={styles.resultValue}>
+								{createdUserRealm
+									? `${createdUserRealm.name} (${createdUserRealm.code})`
+									: createdUser.realmCode}
+							</Text>
+						</div>
+					</div>
+
+					<div className={styles.resultActions}>
 						<ButtonField onClick={() => navigate(ROUTES.USERS)}>
-							Отмена
+							К списку пользователей
+						</ButtonField>
+						<ButtonField
+							onClick={() => navigate(buildUserRoute(createdUser.id))}
+							type='primary'
+						>
+							Открыть пользователя
 						</ButtonField>
 					</div>
-				</form>
-			</Card>
+					</Card>
+				)}
+			</div>
 		</div>
 	)
 }

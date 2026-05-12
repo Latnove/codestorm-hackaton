@@ -1,85 +1,106 @@
-import { getMockMiniappById, type Miniapp } from '@/entities/miniapp'
-import { buildLaunchRoute, ROUTES } from '@/shared/config'
-import { Button, Card, Descriptions, Form, Input, Select, Space, Typography } from 'antd'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import type { RealmMiniAppFormValues } from '@/entities/miniapp'
+import { getRealmMiniAppPermissions, useUserStore } from '@/entities/user'
+import {
+	selectRealmMiniApp,
+	useRealmMiniAppsStore,
+} from '@/features/miniapps'
+import {
+	selectRealmRolesByRealmCode,
+	useRealmRolesStore,
+	useRealmsStore,
+} from '@/features/realms'
+import {
+	buildRealmMiniappRoute,
+	buildRealmMiniappsRoute,
+	buildRealmOverviewRoute,
+	ROUTES,
+} from '@/shared/config'
+import { ButtonField } from '@/shared/ui/ButtonField'
+import { Card, message, Space, Typography } from 'antd'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { useShallow } from 'zustand/react/shallow'
+import {
+	buildRealmMiniAppFormValues,
+	RealmMiniAppForm,
+} from '../../shared/ui/RealmMiniAppForm'
+import styles from '../../shared/ui/RealmMiniAppsPage.module.css'
 
-const { Title } = Typography
-
-type MiniappForm = Pick<Miniapp, 'name' | 'description' | 'launchUrl' | 'version' | 'status'> & {
-  allowedRoles: string
-}
+const { Text, Title } = Typography
 
 export const EditMiniappPage = () => {
-  const navigate = useNavigate()
-  const { miniappId = '' } = useParams()
-  const miniapp = getMockMiniappById(miniappId)
+	const navigate = useNavigate()
+	const { miniAppCode = '', realmCode = '' } = useParams()
+	const user = useUserStore(state => state.user)
+	const realm = useRealmsStore(state =>
+		state.realms.find(item => item.code === realmCode),
+	)
+	const miniApp = useRealmMiniAppsStore(
+		selectRealmMiniApp(realmCode, miniAppCode),
+	)
+	const realmRoles = useRealmRolesStore(
+		useShallow(selectRealmRolesByRealmCode(realmCode)),
+	)
+	const updateRealmMiniApp = useRealmMiniAppsStore(
+		state => state.updateRealmMiniApp,
+	)
+	const permissions = getRealmMiniAppPermissions(user, realmCode)
 
-  if (!miniapp) {
-    return <Card><Title level={2}>Miniapp not found</Title></Card>
-  }
+	if (!realm) {
+		return <Navigate to={ROUTES.NOT_FOUND} />
+	}
 
-  const handleFinish = () => {
-    navigate(ROUTES.MINIAPPS)
-  }
+	if (!permissions.canEditMiniApp && !permissions.canEditAccess) {
+		return <Navigate to={ROUTES.FORBIDDEN} />
+	}
 
-  const updateStatus = () => {
-    navigate(ROUTES.MINIAPPS)
-  }
+	if (!miniApp) {
+		return <Navigate to={ROUTES.NOT_FOUND} />
+	}
 
-  return (
-    <Space direction="vertical" size={20} style={{ maxWidth: 840, width: '100%' }}>
-      <Space align="center" style={{ justifyContent: 'space-between', width: '100%' }}>
-        <Title level={1}>Edit miniapp</Title>
-        <Link to={buildLaunchRoute(miniapp.id)}><Button>Preview Launch</Button></Link>
-      </Space>
-      <Card>
-        <Descriptions
-          bordered
-          column={1}
-          items={[
-            { key: 'id', label: 'ID', children: miniapp.id },
-            { key: 'createdAt', label: 'Created', children: miniapp.createdAt },
-            { key: 'updatedAt', label: 'Updated', children: miniapp.updatedAt },
-          ]}
-        />
-      </Card>
-      <Card>
-        <Form<MiniappForm>
-          initialValues={{ ...miniapp, allowedRoles: miniapp.allowedRoles.join(', ') }}
-          layout="vertical"
-          onFinish={handleFinish}
-        >
-          <Form.Item label="Name" name="name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Description" name="description">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-          <Form.Item label="Launch URL" name="launchUrl" rules={[{ required: true, type: 'url' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Version" name="version">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Allowed roles" name="allowedRoles" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Status" name="status" rules={[{ required: true }]}>
-            <Select
-              options={[
-                { label: 'Draft', value: 'draft' },
-                { label: 'Published', value: 'published' },
-                { label: 'Disabled', value: 'disabled' },
-              ]}
-            />
-          </Form.Item>
-          <Space wrap>
-            <Button htmlType="submit" type="primary">Save</Button>
-            <Button onClick={updateStatus}>Publish</Button>
-            <Button onClick={updateStatus} danger>Disable</Button>
-          </Space>
-        </Form>
-      </Card>
-    </Space>
-  )
+	const handleFinish = (values: RealmMiniAppFormValues) => {
+		updateRealmMiniApp(realm.code, miniApp.code, values)
+		message.success(`MiniApp ${miniApp.code} обновлён`)
+		navigate(buildRealmMiniappRoute(realm.code, miniApp.code))
+	}
+
+	return (
+		<div className={`container ${styles.wrapper} ${styles.formWrapper}`}>
+			<div className={styles.header}>
+				<div>
+					<Text type='secondary'>Realm / {realm.name}</Text>
+					<Title className={styles.mainTitle} level={1}>
+						Редактировать MiniApp
+					</Title>
+				</div>
+
+				<Space wrap>
+					<ButtonField
+						onClick={() => navigate(buildRealmOverviewRoute(realm.code))}
+					>
+						В Realm
+					</ButtonField>
+					<ButtonField
+						onClick={() => navigate(buildRealmMiniappsRoute(realm.code))}
+					>
+						К MiniApps
+					</ButtonField>
+				</Space>
+			</div>
+
+			<Card className={`${styles.card} ${styles.formCard}`}>
+				<RealmMiniAppForm
+					initialValues={buildRealmMiniAppFormValues(miniApp)}
+					mode='edit'
+					onCancel={() =>
+						navigate(buildRealmMiniappRoute(realm.code, miniApp.code))
+					}
+					onFinish={handleFinish}
+					permissions={permissions}
+					realmCode={realm.code}
+					realmRoles={realmRoles}
+					submitLabel='Сохранить'
+				/>
+			</Card>
+		</div>
+	)
 }

@@ -1,34 +1,49 @@
-import type { Realm } from '@/entities/realm'
+import {
+	realmStatusColors,
+	realmStatusLabels,
+	type Realm,
+} from '@/entities/realm'
 import { ConnectMiniAppButton } from '@/features/realms/connect-miniapp'
-import { CreateClientButton } from '@/features/realms/create-client'
 import { CreateRoleButton } from '@/features/realms/create-role'
+import { RotateSecretButton } from '@/features/realms/rotate-secret'
 import { ViewStatisticsButton } from '@/features/realms/view-statistics'
+import { ROUTES } from '@/shared/config'
+import { ButtonField } from '@/shared/ui/ButtonField'
 import { Card, Tag } from 'antd'
-import type { ReactNode } from 'react'
 import Text from 'antd/es/typography/Text'
 import Title from 'antd/es/typography/Title'
+import type { ReactNode } from 'react'
+import { useNavigate } from 'react-router'
 import styles from './RealmOverview.module.css'
 
 interface RealmOverviewProps {
 	manageActions?: ReactNode
+	isRoot: boolean
 	realm: Realm
 }
 
 const formatDate = (value: string) => new Date(value).toLocaleString()
 
-const getStatusColor = (status: Realm['status']) =>
-	status === 'ACTIVE' ? 'green' : 'red'
+export const RealmOverview = ({
+	manageActions,
+	realm,
+	isRoot,
+}: RealmOverviewProps) => {
+	const navigate = useNavigate()
 
-export const RealmOverview = ({ manageActions, realm }: RealmOverviewProps) => {
 	const rows = [
 		{ label: 'Описание', value: realm.description || '-' },
 		{
 			label: 'Статус',
-			value: <Tag color={getStatusColor(realm.status)}>{realm.status}</Tag>,
+			value: (
+				<Tag color={realmStatusColors[realm.status]}>
+					{realmStatusLabels[realm.status]}
+				</Tag>
+			),
 		},
 		{ label: 'Дата создания', value: formatDate(realm.createdAt) },
 		{ label: 'Последнее обновление', value: formatDate(realm.updatedAt) },
-		{ label: 'Количество админов', value: realm.clientsCount },
+		{ label: 'Количество клиентов', value: realm.clientsCount },
 		{ label: 'Количество MiniApps', value: realm.miniappsCount },
 		{ label: 'Активные MiniApps', value: realm.publishedMiniappsCount },
 		{ label: 'Число активных сессий', value: realm.activeSessionsCount },
@@ -81,9 +96,26 @@ export const RealmOverview = ({ manageActions, realm }: RealmOverviewProps) => {
 				</div>
 
 				<div className={styles.actions}>
-					<CreateClientButton realmCode={realm.code} />
+					{isRoot && (
+						<ButtonField
+							onClick={() => navigate(ROUTES.USER_CREATE)}
+							type='text'
+						>
+							Создать пользователя
+						</ButtonField>
+					)}
+
 					<CreateRoleButton realmCode={realm.code} />
+
 					<ConnectMiniAppButton realmCode={realm.code} />
+
+					{isRoot && (
+						<RotateSecretButton
+							clientId={realm.metadata.clientId}
+							realmCode={realm.code}
+						/>
+					)}
+
 					<ViewStatisticsButton realmCode={realm.code} />
 				</div>
 			</div>

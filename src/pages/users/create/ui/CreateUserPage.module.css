@@ -1,13 +1,53 @@
-.wrapper {
+.layout,
+.layoutCreated {
 	display: grid;
-	grid-template-columns: minmax(0, 760px);
-	justify-content: center;
+	gap: 20px;
+	align-items: flex-start;
 }
 
-.card {
-	border: 0;
+.layout {
+	grid-template-columns: minmax(0, 760px);
+	justify-content: center;
+	animation: layoutEnter 0.32s ease both;
+}
+
+.layoutCreated {
+	grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+	justify-content: stretch;
+	animation: layoutCreated 0.48s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.formCard,
+.resultCard {
+	border: 1px solid #e8eef8;
 	background: #ffffff;
-	box-shadow: 0 18px 44px rgb(42 65 130 / 10%);
+	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.resultCard {
+	height: 100%;
+}
+
+.resultCard :global(.ant-card-body) {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.formCard {
+	transition:
+		transform 0.35s ease,
+		box-shadow 0.35s ease,
+		opacity 0.35s ease;
+}
+
+.layoutCreated .formCard {
+	animation: formShiftLeft 0.56s cubic-bezier(0.16, 1, 0.3, 1) both;
+	box-shadow: 0 8px 22px rgb(42 65 130 / 7%);
+}
+
+.resultCard {
+	animation: resultReveal 0.62s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
 .header {
@@ -35,8 +75,123 @@
 	margin-top: 8px;
 }
 
+.alert {
+	margin-bottom: 16px;
+}
+
+.resultList {
+	overflow: hidden;
+	margin-bottom: 16px;
+	border: 1px solid #e8eef8;
+	border-radius: 14px;
+}
+
+.resultRow {
+	display: grid;
+	grid-template-columns: 120px minmax(0, 1fr);
+	gap: 12px;
+	align-items: center;
+	padding: 12px 14px;
+	border-bottom: 1px solid #eef2f8;
+}
+
+.resultRow:last-child {
+	border-bottom: 0;
+}
+
+.resultLabel {
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.resultValue {
+	color: #18253f;
+	font-size: 13px;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.resultActions {
+	display: flex;
+	gap: 10px;
+	margin-top: auto;
+}
+
+.resultActions :global(.ant-btn) {
+	flex: 1;
+}
+
+@media (width <= 920px) {
+	.layout,
+	.layoutCreated {
+		grid-template-columns: 1fr;
+	}
+}
+
 @media (width <= 720px) {
 	.form {
 		grid-template-columns: 1fr;
+	}
+
+	.submitRow,
+	.resultActions {
+		align-items: stretch;
+		flex-direction: column;
+	}
+}
+
+@media (width <= 560px) {
+	.resultRow {
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+}
+
+@keyframes formShiftLeft {
+	from {
+		opacity: 0.92;
+		transform: translateX(120px) scale(1.015);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes resultReveal {
+	from {
+		opacity: 0;
+		filter: blur(5px);
+		transform: translateX(56px) scale(0.98);
+	}
+
+	to {
+		opacity: 1;
+		filter: blur(0);
+		transform: translateX(0);
+	}
+}
+
+@keyframes layoutEnter {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes layoutCreated {
+	from {
+		column-gap: 64px;
+	}
+
+	to {
+		column-gap: 20px;
 	}
 }

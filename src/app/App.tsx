@@ -1,7 +1,7 @@
 import { ConfigProvider } from 'antd'
 import ruRU from 'antd/locale/ru_RU'
 import 'normalize.css'
-import { AppRouter } from './providers'
+import { AppRouter, QueryProvider } from './providers'
 import './styles/index.css'
 import './styles/variables.css'
 
@@ -34,7 +34,9 @@ function App() {
 				},
 			}}
 		>
-			<AppRouter />
+			<QueryProvider>
+				<AppRouter />
+			</QueryProvider>
 		</ConfigProvider>
 	)
 }

@@ -1,0 +1,12 @@
+.inline {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.inline :global(.ant-btn) {
+	height: 40px;
+	border-radius: 10px;
+	font-weight: 500;
+}

@@ -1,15 +1,15 @@
-import { type Realm, type RealmStatus } from '@/entities/realm'
+import {
+	realmStatusColors,
+	realmStatusLabels,
+	type Realm,
+	type RealmStatus,
+} from '@/entities/realm'
 import { Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import type { ReactNode } from 'react'
 import styles from './RealmsList.module.css'
 
 const { Text } = Typography
-
-const statusColor: Record<RealmStatus, string> = {
-	ACTIVE: '#16a34a',
-	DISABLED: '#ea580c',
-}
 
 interface RealmsListProps {
 	data: Realm[]
@@ -30,22 +30,25 @@ export const RealmsList = ({
 		},
 		{ title: 'Name', dataIndex: 'name' },
 		{
-			title: 'Status',
+			title: 'Статус',
 			dataIndex: 'status',
 			render: (value: RealmStatus) => (
-				<Tag color={statusColor[value]}>{value}</Tag>
+				<Tag color={realmStatusColors[value]}>{realmStatusLabels[value]}</Tag>
 			),
 		},
-		{ title: 'MiniApps count', dataIndex: 'miniappsCount' },
-		{ title: 'Clients count', dataIndex: 'clientsCount' },
+		{ title: 'Число MiniApps', dataIndex: 'miniappsCount' },
+		{ title: 'Число пользователй', dataIndex: 'clientsCount' },
 		{
-			title: 'Created at',
+			title: 'Создан',
 			dataIndex: 'createdAt',
 			render: (value: string) => new Date(value).toLocaleDateString(),
 		},
-		{
+	]
+
+	if (renderActions) {
+		columns.push({
 			align: 'center',
-			title: 'Actions',
+			title: 'Действия',
 			width: 150,
 			render: (_, realm) => (
 				<div
@@ -55,8 +58,8 @@ export const RealmsList = ({
 					{renderActions?.(realm)}
 				</div>
 			),
-		},
-	]
+		})
+	}
 
 	return (
 		<Table<Realm>

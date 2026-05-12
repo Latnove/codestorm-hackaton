@@ -1,5 +1,6 @@
+import { buildRealmMiniappsRoute } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
-import { message } from 'antd'
+import { useNavigate } from 'react-router-dom'
 
 interface ConnectMiniAppButtonProps {
 	realmCode: string
@@ -8,12 +9,12 @@ interface ConnectMiniAppButtonProps {
 export const ConnectMiniAppButton = ({
 	realmCode,
 }: ConnectMiniAppButtonProps) => {
+	const navigate = useNavigate()
+
 	return (
 		<ButtonField
 			onClick={() => {
-				message.info(
-					`Connect MiniApp для ${realmCode} будет добавлен следующим шагом`,
-				)
+				navigate(buildRealmMiniappsRoute(realmCode))
 			}}
 		>
 			Перейти в MiniApps

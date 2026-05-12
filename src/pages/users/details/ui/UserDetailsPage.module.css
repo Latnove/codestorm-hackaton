@@ -4,6 +4,16 @@
 	gap: 20px;
 }
 
+.header {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.mainTitle {
+	margin-bottom: 0 !important;
+}
+
 .grid {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(340px, 0.7fr);
@@ -17,7 +27,8 @@
 }
 
 .sectionTitle {
-	margin-bottom: 16px;
+	margin-bottom: 16px !important;
+	font-weight: 600 !important;
 }
 
 .rows {
@@ -27,7 +38,7 @@
 
 .row {
 	display: grid;
-	grid-template-columns: 160px minmax(0, 1fr);
+	grid-template-columns: 170px minmax(0, 1fr);
 	gap: 14px;
 	padding: 14px 0;
 	border-bottom: 1px solid #eef2f8;
@@ -40,14 +51,19 @@
 .label {
 	color: #64748b;
 	font-size: 12px;
-	font-weight: 700;
+	font-weight: 600;
 	text-transform: uppercase;
 }
 
 .value {
 	color: #18253f;
-	font-weight: 600;
+	font-weight: 500;
 	overflow-wrap: anywhere;
+}
+
+.realmLink {
+	color: #2451d6;
+	font-weight: 500;
 }
 
 .form {
@@ -58,7 +74,13 @@
 
 .actions {
 	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
 	gap: 10px;
+}
+
+.deleteAction {
+	margin-right: auto;
 }
 
 @media (width <= 900px) {

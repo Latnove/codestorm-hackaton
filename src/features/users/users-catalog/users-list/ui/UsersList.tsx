@@ -1,19 +1,18 @@
 import {
+	platformUserStatusColors,
+	platformUserStatusLabels,
 	roleLabels,
 	type PlatformUser,
 	type PlatformUserStatus,
 } from '@/entities/user'
+import { buildRealmOverviewRoute } from '@/shared/config'
 import { Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import styles from './UsersList.module.css'
 
 const { Text } = Typography
-
-const statusColor: Record<PlatformUserStatus, string> = {
-	active: 'green',
-	blocked: 'red',
-}
 
 interface UsersListProps {
 	data: PlatformUser[]
@@ -37,33 +36,42 @@ export const UsersList = ({ data, onOpen, renderActions }: UsersListProps) => {
 		},
 		{ title: 'Email', dataIndex: 'email' },
 		{
-			title: 'Status',
+			title: 'Статус',
 			dataIndex: 'status',
 			render: (value: PlatformUserStatus) => (
-				<Tag color={statusColor[value]}>{value}</Tag>
+				<Tag color={platformUserStatusColors[value]}>
+					{platformUserStatusLabels[value]}
+				</Tag>
 			),
 		},
 		{
-			title: 'Global roles',
-			dataIndex: 'globalRoles',
-			render: (roles: PlatformUser['globalRoles']) => (
-				<div className={styles.roles}>
-					{roles.map(role => (
-						<Tag color='geekblue' key={role}>
-							{roleLabels[role]}
-						</Tag>
-					))}
-				</div>
+			title: 'Роль',
+			dataIndex: 'role',
+			render: (role: PlatformUser['role']) => (
+				<Tag color='geekblue'>{roleLabels[role]}</Tag>
 			),
 		},
 		{
-			title: 'Created at',
+			title: 'Realm',
+			dataIndex: 'realmCode',
+			render: (realmCode: string) => (
+				<Link
+					className={styles.realmLink}
+					onClick={event => event.stopPropagation()}
+					to={buildRealmOverviewRoute(realmCode)}
+				>
+					{realmCode}
+				</Link>
+			),
+		},
+		{
+			title: 'Дата создания',
 			dataIndex: 'createdAt',
 			render: formatDate,
 		},
 		{
 			align: 'center',
-			title: 'Actions',
+			title: 'Действия',
 			width: 150,
 			render: (_, user) => (
 				<div

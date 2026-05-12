@@ -1,3 +1,4 @@
+import { Roles, useUserStore } from '@/entities/user'
 import {
 	RealmsFilters,
 	RealmsList,
@@ -16,8 +17,10 @@ import styles from './RealmsPage.module.css'
 
 export const RealmsPage = () => {
 	const navigate = useNavigate()
+	const user = useUserStore(state => state.user)
 
 	const filteredRealms = useRealmsStore(useShallow(selectFilteredRealms))
+	const isRoot = user?.role === Roles.ROOT
 
 	const openRealm = (realmCode: string) => {
 		navigate(buildRealmOverviewRoute(realmCode))
@@ -33,13 +36,15 @@ export const RealmsPage = () => {
 					<Title level={1}>Realms</Title>
 				</div>
 
-				<ButtonField
-					className={styles.createButton}
-					onClick={() => navigate(ROUTES.REALM_CREATE)}
-				>
-					<span className={styles.createButtonIcon}>+</span>
-					Создать Realm
-				</ButtonField>
+				{isRoot && (
+					<ButtonField
+						className={styles.createButton}
+						onClick={() => navigate(ROUTES.REALM_CREATE)}
+					>
+						<span className={styles.createButtonIcon}>+</span>
+						Создать Realm
+					</ButtonField>
+				)}
 			</Space>
 
 			<Card>
@@ -54,9 +59,11 @@ export const RealmsPage = () => {
 					<RealmsList
 						data={filteredRealms}
 						onOpen={openRealm}
-						renderActions={realm => (
-							<RealmManageActions realm={realm} showOpen />
-						)}
+						renderActions={
+							isRoot
+								? realm => <RealmManageActions realm={realm} showOpen />
+								: undefined
+						}
 					/>
 				</Space>
 			</Card>

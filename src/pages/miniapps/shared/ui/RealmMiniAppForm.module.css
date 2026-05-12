@@ -1,0 +1,168 @@
+.form {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #edf2f8;
+}
+
+.section:last-of-type {
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+
+.sectionHeader {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.sectionTitle {
+	margin: 0 !important;
+	color: #18253f !important;
+	font-size: 18px !important;
+}
+
+.fieldGrid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 16px;
+}
+
+.form :global(.ant-input:not(textarea)) {
+	height: 44px !important;
+}
+
+.form :global(.ant-select-single) {
+	height: 44px !important;
+}
+
+.form :global(.ant-select-single .ant-select-selector) {
+	height: 44px !important;
+	align-items: center;
+}
+
+.form :global(.ant-select-single .ant-select-selection-item),
+.form :global(.ant-select-single .ant-select-selection-placeholder) {
+	line-height: 42px !important;
+}
+
+.fullWidth {
+	grid-column: 1 / -1;
+}
+
+.rolesSelect {
+	height: 44px !important;
+	min-height: 44px !important;
+	font-size: 14px;
+}
+
+.rolesSelect :global(.ant-select-selector) {
+	height: 44px !important;
+	min-height: 44px !important;
+	align-items: center;
+	overflow: hidden;
+	padding: 0 11px !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+.rolesSelect :global(.ant-select-selection-wrap) {
+	height: 42px !important;
+	min-height: 42px !important;
+	align-items: center;
+}
+
+.rolesSelect :global(.ant-select-selection-overflow) {
+	align-items: center;
+	flex-wrap: nowrap;
+	width: 100%;
+	height: 42px;
+	min-height: 42px;
+	overflow: hidden;
+}
+
+.rolesSelect :global(.ant-select-selection-overflow-item) {
+	display: flex;
+	align-items: center;
+	flex: 0 1 auto;
+	height: 28px;
+	min-width: 0;
+}
+
+.rolesSelect :global(.ant-select-selection-overflow-item-rest) {
+	flex: 0 0 auto;
+}
+
+.rolesSelect :global(.ant-select-selection-search) {
+	display: flex;
+	align-items: center;
+	height: 42px;
+	min-width: 8px;
+	margin-inline-start: 0;
+}
+
+.rolesSelect :global(.ant-select-content) {
+	height: 42px !important;
+}
+
+.rolesSelect :global(.ant-select-selection-placeholder) {
+	line-height: 42px !important;
+}
+
+.rolesSelect :global(.ant-select-selection-item) {
+	display: inline-flex;
+	align-items: center;
+	max-width: 100%;
+	height: 26px !important;
+	margin: 0 4px 0 0 !important;
+	padding: 0 7px !important;
+	border-radius: 6px;
+	background: #eef4ff;
+	color: #26364f;
+	font-size: 13px;
+	line-height: 24px !important;
+}
+
+.rolesSelect :global(.ant-select-selection-item-content) {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 24px !important;
+}
+
+.rolesSelect :global(.ant-select-selection-item-remove) {
+	display: inline-flex;
+	align-items: center;
+	margin-inline-start: 4px;
+	color: #8a97ac;
+	font-size: 12px;
+}
+
+.hint {
+	display: block;
+	margin-top: 4px;
+	color: #64748b;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding-top: 4px;
+}
+
+@media (width <= 760px) {
+	.actions {
+		align-items: stretch;
+		flex-direction: column;
+	}
+}

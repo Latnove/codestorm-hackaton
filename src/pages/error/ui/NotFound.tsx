@@ -1,5 +1,5 @@
 import { Result } from 'antd'
 
 export const NotFound = () => {
-  return <Result status="404" title="Not found" />
+  return <div className="container"><Result status="404" title="Not found" /></div>
 }

@@ -1,0 +1,60 @@
+import type { ExternalRoleMapping } from './types'
+
+export const mockRoleMappings: ExternalRoleMapping[] = [
+	{
+		id: 'role-mapping-bank-mobile-mb-premium',
+		createdAt: '2026-05-03T09:15:00.000Z',
+		externalRole: 'MB_PREMIUM',
+		realmCode: 'bank-mobile',
+		realmRoleCode: 'PREMIUM_CLIENT',
+		updatedAt: '2026-05-09T10:30:00.000Z',
+	},
+	{
+		id: 'role-mapping-bank-mobile-bank-vip',
+		createdAt: '2026-05-03T10:20:00.000Z',
+		externalRole: 'BANK_VIP',
+		realmCode: 'bank-mobile',
+		realmRoleCode: 'VIP',
+		updatedAt: '2026-05-09T11:20:00.000Z',
+	},
+	{
+		id: 'role-mapping-bank-mobile-staff',
+		createdAt: '2026-05-04T12:20:00.000Z',
+		externalRole: 'STAFF',
+		realmCode: 'bank-mobile',
+		realmRoleCode: 'EMPLOYEE',
+		updatedAt: '2026-05-10T12:20:00.000Z',
+	},
+	{
+		id: 'role-mapping-bank-mobile-client',
+		createdAt: '2026-05-04T13:40:00.000Z',
+		externalRole: 'CLIENT',
+		realmCode: 'bank-mobile',
+		realmRoleCode: 'USER',
+		updatedAt: '2026-05-10T13:40:00.000Z',
+	},
+	{
+		id: 'role-mapping-telecom-app-subscriber',
+		createdAt: '2026-05-05T10:05:00.000Z',
+		externalRole: 'SUBSCRIBER',
+		realmCode: 'telecom-app',
+		realmRoleCode: 'USER',
+		updatedAt: '2026-05-10T10:05:00.000Z',
+	},
+	{
+		id: 'role-mapping-telecom-app-vip',
+		createdAt: '2026-05-05T11:05:00.000Z',
+		externalRole: 'TELCO_VIP',
+		realmCode: 'telecom-app',
+		realmRoleCode: 'VIP',
+		updatedAt: '2026-05-10T11:05:00.000Z',
+	},
+	{
+		id: 'role-mapping-fintech-demo-client',
+		createdAt: '2026-05-07T12:05:00.000Z',
+		externalRole: 'CLIENT',
+		realmCode: 'fintech-demo',
+		realmRoleCode: 'USER',
+		updatedAt: '2026-05-08T12:05:00.000Z',
+	},
+]

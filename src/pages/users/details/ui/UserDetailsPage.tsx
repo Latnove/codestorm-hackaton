@@ -1,4 +1,6 @@
 import {
+	platformUserStatusColors,
+	platformUserStatusLabels,
 	roleLabels,
 	Roles,
 	type PlatformUserStatus,
@@ -6,24 +8,21 @@ import {
 } from '@/entities/user'
 import { useRealmsStore } from '@/features/realms'
 import { useUsersStore } from '@/features/users'
-import { ROUTES } from '@/shared/config'
+import { buildRealmOverviewRoute, ROUTES } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
+import { InputField } from '@/shared/ui/InputField'
 import { SelectField } from '@/shared/ui/SelectField'
-import { Card, Table, Tag, Typography, message } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import { UserManageActions } from '@/widgets/user-manage-actions'
+import { Card, message, Tag, Typography } from 'antd'
 import { useForm } from 'react-hook-form'
-import { Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import styles from './UserDetailsPage.module.css'
 
 const { Text, Title } = Typography
 
-type AssignRolesForm = {
-	realmCode: string
-	roles: Role[]
-}
-
 type UserAccessForm = {
-	globalRoles: Role[]
+	email: string
+	role: Role
 	status: PlatformUserStatus
 }
 
@@ -33,8 +32,8 @@ const roleOptions = [Roles.ROOT, Roles.ADMIN, Roles.READONLY].map(role => ({
 }))
 
 const statusOptions = [
-	{ label: 'Active', value: 'active' },
-	{ label: 'Blocked', value: 'blocked' },
+	{ label: platformUserStatusLabels.active, value: 'active' },
+	{ label: platformUserStatusLabels.disable, value: 'disable' },
 ]
 
 const formatDate = (value: string) => new Date(value).toLocaleString()
@@ -45,86 +44,48 @@ export const UserDetailsPage = () => {
 		state.users.find(item => item.id === userId),
 	)
 	const realms = useRealmsStore(state => state.realms)
-	const assignRealmRoles = useUsersStore(state => state.assignRealmRoles)
-	const removeRealmRoles = useUsersStore(state => state.removeRealmRoles)
 	const updateUserAccess = useUsersStore(state => state.updateUserAccess)
 
 	const {
-		control: assignControl,
-		handleSubmit: handleAssignSubmit,
-		reset: resetAssignForm,
-	} = useForm<AssignRolesForm>({
-		defaultValues: {
-			realmCode: realms[0]?.code ?? '',
-			roles: [Roles.ADMIN],
-		},
-	})
-
-	const {
 		control: accessControl,
+		formState: { isDirty, isValid },
 		handleSubmit: handleAccessSubmit,
+		reset,
 	} = useForm<UserAccessForm>({
 		defaultValues: {
-			globalRoles: user?.globalRoles ?? [Roles.ADMIN],
+			email: user?.email ?? '',
+			role: user?.role ?? Roles.ADMIN,
 			status: user?.status ?? 'active',
 		},
+		mode: 'onBlur',
 	})
 
 	if (!user) {
 		return <Navigate to={ROUTES.NOT_FOUND} />
 	}
 
-	const realmOptions = realms.map(realm => ({
-		label: `${realm.name} (${realm.code})`,
-		value: realm.code,
-	}))
-
-	const columns: ColumnsType<(typeof user.realmRoles)[number]> = [
-		{
-			title: 'Realm',
-			dataIndex: 'realmCode',
-		},
-		{
-			title: 'Roles',
-			dataIndex: 'roles',
-			render: (roles: Role[]) =>
-				roles.map(role => (
-					<Tag color='geekblue' key={role}>
-						{roleLabels[role]}
-					</Tag>
-				)),
-		},
-		{
-			title: 'Actions',
-			width: 140,
-			render: (_, assignment) => (
-				<ButtonField
-					danger
-					onClick={() => removeRealmRoles(user.id, assignment.realmCode)}
-					type='text'
-				>
-					Удалить
-				</ButtonField>
-			),
-		},
-	]
-
-	const handleAssign = (values: AssignRolesForm) => {
-		assignRealmRoles(user.id, values)
-		message.success('Роли Realm обновлены')
-		resetAssignForm(values)
-	}
+	const userRealm = realms.find(realm => realm.code === user.realmCode)
 
 	const handleUpdateAccess = (values: UserAccessForm) => {
 		updateUserAccess(user.id, values)
-		message.success('Доступ пользователя обновлён')
+		message.success('Пользователь обновлён')
+	}
+
+	const handleReset = () => {
+		reset({
+			email: user.email,
+			role: user.role,
+			status: user.status,
+		})
 	}
 
 	return (
-		<div className={styles.wrapper}>
-			<div>
-				<Text type='secondary'>Platform user</Text>
-				<Title level={1}>{user.username}</Title>
+		<div className={`container ${styles.wrapper}`}>
+			<div className={styles.header}>
+				<Text type='secondary'>Страница пользователя host-app</Text>
+				<Title className={styles.mainTitle} level={1}>
+					{user.username}
+				</Title>
 			</div>
 
 			<div className={styles.grid}>
@@ -142,29 +103,38 @@ export const UserDetailsPage = () => {
 							<Text className={styles.value}>{user.email}</Text>
 						</div>
 						<div className={styles.row}>
-							<Text className={styles.label}>Status</Text>
+							<Text className={styles.label}>Realm</Text>
+							<Text className={styles.value}>
+								<Link
+									className={styles.realmLink}
+									to={buildRealmOverviewRoute(user.realmCode)}
+								>
+									{userRealm
+										? `${userRealm.name} (${userRealm.code})`
+										: user.realmCode}
+								</Link>
+							</Text>
+						</div>
+						<div className={styles.row}>
+							<Text className={styles.label}>Статус</Text>
 							<div>
-								<Tag color={user.status === 'active' ? 'green' : 'red'}>
-									{user.status}
+								<Tag color={platformUserStatusColors[user.status]}>
+									{platformUserStatusLabels[user.status]}
 								</Tag>
 							</div>
 						</div>
 						<div className={styles.row}>
-							<Text className={styles.label}>Global roles</Text>
+							<Text className={styles.label}>Роль</Text>
 							<div>
-								{user.globalRoles.map(role => (
-									<Tag color='geekblue' key={role}>
-										{roleLabels[role]}
-									</Tag>
-								))}
+								<Tag color='geekblue'>{roleLabels[user.role]}</Tag>
 							</div>
 						</div>
 						<div className={styles.row}>
-							<Text className={styles.label}>CreatedAt</Text>
+							<Text className={styles.label}>Дата создания</Text>
 							<Text className={styles.value}>{formatDate(user.createdAt)}</Text>
 						</div>
 						<div className={styles.row}>
-							<Text className={styles.label}>UpdatedAt</Text>
+							<Text className={styles.label}>Последнее обновление</Text>
 							<Text className={styles.value}>{formatDate(user.updatedAt)}</Text>
 						</div>
 					</div>
@@ -178,64 +148,48 @@ export const UserDetailsPage = () => {
 						className={styles.form}
 						onSubmit={handleAccessSubmit(handleUpdateAccess)}
 					>
-						<SelectField<UserAccessForm, Role[]>
+						<InputField
 							control={accessControl}
-							label='Global roles'
-							mode='multiple'
-							name='globalRoles'
-							options={roleOptions}
-							placeholder='Выберите роли'
+							label='Email'
+							name='email'
+							placeholder='user@example.com'
 						/>
+
+						<SelectField<UserAccessForm, Role>
+							control={accessControl}
+							label='Роль'
+							name='role'
+							options={roleOptions}
+							placeholder='Выберите роль'
+						/>
+
 						<SelectField<UserAccessForm, PlatformUserStatus>
 							control={accessControl}
-							label='Status'
+							label='Статус'
 							name='status'
 							options={statusOptions}
-							placeholder='Status'
+							placeholder='Выберите статус'
 						/>
 						<div className={styles.actions}>
-							<ButtonField htmlType='submit' type='primary'>
+							<UserManageActions
+								showView={false}
+								user={user}
+								variant='inline'
+								className={styles.deleteAction}
+							/>
+
+							<ButtonField onClick={handleReset}>Очистить</ButtonField>
+							<ButtonField
+								disabled={!isDirty || !isValid}
+								htmlType='submit'
+								type='primary'
+							>
 								Сохранить
 							</ButtonField>
 						</div>
 					</form>
 				</Card>
 			</div>
-
-			<Card className={styles.card}>
-				<Title className={styles.sectionTitle} level={3}>
-					Realm roles
-				</Title>
-				<form
-					className={styles.form}
-					onSubmit={handleAssignSubmit(handleAssign)}
-				>
-					<SelectField<AssignRolesForm, string>
-						control={assignControl}
-						label='Realm'
-						name='realmCode'
-						options={realmOptions}
-						placeholder='Выберите Realm'
-					/>
-					<SelectField<AssignRolesForm, Role[]>
-						control={assignControl}
-						label='Roles'
-						mode='multiple'
-						name='roles'
-						options={roleOptions}
-						placeholder='Выберите роли'
-					/>
-					<ButtonField htmlType='submit' type='primary'>
-						Добавить
-					</ButtonField>
-				</form>
-				<Table
-					columns={columns}
-					dataSource={user.realmRoles}
-					pagination={false}
-					rowKey='realmCode'
-				/>
-			</Card>
 		</div>
 	)
 }

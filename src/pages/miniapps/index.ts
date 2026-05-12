@@ -1,3 +1,5 @@
+export { MiniappAccessPage } from './access/ui/MiniappAccessPage'
 export { CreateMiniappPage } from './create/ui/CreateMiniappPage'
+export { MiniappDetailsPage } from './details/ui/MiniappDetailsPage'
 export { EditMiniappPage } from './edit/ui/EditMiniappPage'
 export { MiniappsPage } from './list/ui/MiniappsPage'

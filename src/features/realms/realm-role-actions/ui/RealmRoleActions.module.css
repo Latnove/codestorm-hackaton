@@ -1,0 +1,5 @@
+.tooltipTarget {
+	display: inline-flex;
+	width: 100%;
+	cursor: not-allowed;
+}

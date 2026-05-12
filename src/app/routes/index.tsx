@@ -6,10 +6,17 @@ import { LaunchPage } from '@/pages/launch'
 import {
 	CreateMiniappPage,
 	EditMiniappPage,
+	MiniappAccessPage,
+	MiniappDetailsPage,
 	MiniappsPage,
 } from '@/pages/miniapps'
-import { CreateRealmPage, RealmDetailsPage, RealmsPage } from '@/pages/realms'
-import { SettingsPage } from '@/pages/settings'
+import {
+	CreateRealmPage,
+	RealmDetailsPage,
+	RealmRolesPage,
+	RealmsPage,
+	RoleMappingPage,
+} from '@/pages/realms'
 import { CreateUserPage, UserDetailsPage, UsersPage } from '@/pages/users'
 import { EXTERNAL_LINKS, ROUTES } from '@/shared/config'
 import { ExternalRedirect } from '@/shared/ui/ExternalRedirect'
@@ -17,10 +24,57 @@ import { Navigate } from 'react-router-dom'
 import { RequireRole } from '../providers/router/RequireRole'
 import { AppLayout } from '../ui/AppLayout'
 
+const realmViewRoles = [
+	Roles.ROOT,
+	Roles.ADMIN,
+	Roles.REALM_ADMIN,
+	Roles.ACCESS_MANAGER,
+	Roles.MINIAPP_MANAGER,
+	Roles.READONLY,
+	Roles.VIEWER,
+]
+
+const realmManageRoles = [Roles.ROOT, Roles.ADMIN, Roles.REALM_ADMIN]
+
+const realmMiniAppCreateRoles = [
+	Roles.ROOT,
+	Roles.ADMIN,
+	Roles.REALM_ADMIN,
+	Roles.MINIAPP_MANAGER,
+]
+
+const realmMiniAppEditRoles = [
+	Roles.ROOT,
+	Roles.ADMIN,
+	Roles.REALM_ADMIN,
+	Roles.ACCESS_MANAGER,
+	Roles.MINIAPP_MANAGER,
+]
+
+const realmMiniAppAccessRoles = [
+	Roles.ROOT,
+	Roles.ADMIN,
+	Roles.REALM_ADMIN,
+	Roles.ACCESS_MANAGER,
+]
+
+const dashboardRoles = [
+	Roles.ROOT,
+	Roles.ADMIN,
+	Roles.REALM_ADMIN,
+	Roles.MINIAPP_MANAGER,
+	Roles.ACCESS_MANAGER,
+	Roles.VIEWER,
+]
+
 export const routes = [
 	{
 		element: <AppLayout />,
 		children: [
+			{
+				path: '/',
+				element: <Navigate to={ROUTES.DASHBOARD} replace />,
+			},
 			{
 				path: ROUTES.LOGIN,
 				element: <LoginPage />,
@@ -28,7 +82,7 @@ export const routes = [
 			{
 				path: ROUTES.REALMS,
 				element: (
-					<RequireRole roles={[Roles.ROOT]}>
+					<RequireRole roles={[Roles.ROOT, Roles.ADMIN]}>
 						<RealmsPage />
 					</RequireRole>
 				),
@@ -67,47 +121,85 @@ export const routes = [
 			},
 			{
 				path: ROUTES.REALM_DETAILS,
-				element: (
-					<Navigate to='overview' replace />
-				),
+				element: <Navigate to='overview' replace />,
 			},
 			{
 				path: ROUTES.REALM_OVERVIEW,
 				element: (
-					<RequireRole roles={[Roles.ROOT, Roles.ADMIN]}>
+					<RequireRole roles={realmViewRoles}>
 						<RealmDetailsPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_ROLES,
+				element: (
+					<RequireRole roles={realmManageRoles}>
+						<RealmRolesPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_ROLE_CREATE,
+				element: (
+					<RequireRole roles={realmManageRoles}>
+						<RealmRolesPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_ROLE_MAPPING,
+				element: (
+					<RequireRole roles={realmManageRoles}>
+						<RoleMappingPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_MINIAPPS,
+				element: (
+					<RequireRole roles={realmViewRoles}>
+						<MiniappsPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_MINIAPP_CREATE,
+				element: (
+					<RequireRole roles={realmMiniAppCreateRoles}>
+						<CreateMiniappPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_MINIAPP_DETAILS,
+				element: (
+					<RequireRole roles={realmViewRoles}>
+						<MiniappDetailsPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_MINIAPP_EDIT,
+				element: (
+					<RequireRole roles={realmMiniAppEditRoles}>
+						<EditMiniappPage />
+					</RequireRole>
+				),
+			},
+			{
+				path: ROUTES.REALM_MINIAPP_ACCESS,
+				element: (
+					<RequireRole roles={realmMiniAppAccessRoles}>
+						<MiniappAccessPage />
 					</RequireRole>
 				),
 			},
 			{
 				path: ROUTES.DASHBOARD,
 				element: (
-					<RequireRole roles={[Roles.ADMIN]}>
+					<RequireRole roles={dashboardRoles}>
 						<DashboardPage />
-					</RequireRole>
-				),
-			},
-			{
-				path: ROUTES.MINIAPPS,
-				element: (
-					<RequireRole roles={[Roles.ADMIN]}>
-						<MiniappsPage />
-					</RequireRole>
-				),
-			},
-			{
-				path: ROUTES.MINIAPP_CREATE,
-				element: (
-					<RequireRole roles={[Roles.ADMIN]}>
-						<CreateMiniappPage />
-					</RequireRole>
-				),
-			},
-			{
-				path: ROUTES.MINIAPP_EDIT,
-				element: (
-					<RequireRole roles={[Roles.ADMIN]}>
-						<EditMiniappPage />
 					</RequireRole>
 				),
 			},
@@ -138,14 +230,6 @@ export const routes = [
 							title='Переходим в Grafana Logs'
 							to={EXTERNAL_LINKS.GRAFANA_LOGS}
 						/>
-					</RequireRole>
-				),
-			},
-			{
-				path: ROUTES.SETTINGS,
-				element: (
-					<RequireRole roles={[Roles.ADMIN]}>
-						<SettingsPage />
 					</RequireRole>
 				),
 			},

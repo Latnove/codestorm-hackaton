@@ -1,4 +1,4 @@
-import type { RealmStatus } from '@/entities/realm'
+import { realmStatusLabels, type RealmStatus } from '@/entities/realm'
 import {
 	useRealmsActions,
 	useRealmsFiltersState,
@@ -26,9 +26,9 @@ const statusOptions: {
 	label: string
 	value: RealmStatus | 'ALL'
 }[] = [
-	{ label: 'All statuses', value: 'ALL' },
-	{ label: 'ACTIVE', value: 'ACTIVE' },
-	{ label: 'DISABLED', value: 'DISABLED' },
+	{ label: 'Все статусы', value: 'ALL' },
+	{ label: realmStatusLabels.ACTIVE, value: 'ACTIVE' },
+	{ label: realmStatusLabels.DISABLED, value: 'DISABLED' },
 ]
 
 export const RealmsFilters: FC<IRealmsFilters> = ({ className }) => {
@@ -57,9 +57,10 @@ export const RealmsFilters: FC<IRealmsFilters> = ({ className }) => {
 			<div className={styles.search}>
 				<SearchField
 					control={control}
-					label='Search'
+					label='Поиск'
 					name='search'
 					placeholder='Search by code/name'
+					size='medium'
 				/>
 			</div>
 
@@ -69,7 +70,8 @@ export const RealmsFilters: FC<IRealmsFilters> = ({ className }) => {
 					label='Статус'
 					name='status'
 					options={statusOptions}
-					placeholder='Status'
+					placeholder='Статус'
+					size='medium'
 				/>
 			</div>
 		</div>

@@ -4,6 +4,7 @@ export type User = {
 	id: string
 	username: string
 	role: Role
+	realmCode?: string
 	serviceName: string
 	createdAt: string
 }
@@ -13,20 +14,15 @@ export type AuthPayload = {
 	accessToken: string
 }
 
-export type PlatformUserStatus = 'active' | 'blocked'
-
-export type UserRealmRoles = {
-	realmCode: string
-	roles: Role[]
-}
+export type PlatformUserStatus = 'active' | 'disable'
 
 export type PlatformUser = {
 	id: string
 	username: string
 	email: string
 	status: PlatformUserStatus
-	globalRoles: Role[]
-	realmRoles: UserRealmRoles[]
+	role: Role
+	realmCode: string
 	createdAt: string
 	updatedAt: string
 }

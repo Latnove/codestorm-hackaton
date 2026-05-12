@@ -1,0 +1,32 @@
+.card {
+	height: 100%;
+	border: 1px solid #e8eef8;
+	background: #ffffff;
+	box-shadow: 0 12px 32px rgb(42 65 130 / 8%);
+}
+
+.card :global(.ant-card-head) {
+	min-height: 56px;
+	border-bottom: 1px solid #eef3fb;
+}
+
+.card :global(.ant-card-head-title) {
+	color: #18253f;
+	font-size: 16px;
+	font-weight: 500;
+}
+
+.card :global(.ant-card-body) {
+	padding: 18px 16px 12px;
+}
+
+.chart {
+	width: 100%;
+	min-width: 0;
+}
+
+.chart :global(.recharts-default-tooltip) {
+	border: 1px solid #dfe7f4 !important;
+	border-radius: 12px;
+	box-shadow: 0 12px 30px rgb(42 65 130 / 12%);
+}

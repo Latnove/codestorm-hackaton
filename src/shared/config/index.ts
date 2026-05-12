@@ -1,9 +1,16 @@
 export { EXTERNAL_LINKS } from './external'
 export {
-	ROUTES,
-	buildRealmRoute,
-	buildRealmOverviewRoute,
-	buildUserRoute,
+	buildRealmMiniappAccessRoute,
+	buildRealmMiniappCreateRoute,
+	buildRealmMiniappEditRoute,
+	buildRealmMiniappRoute,
 	buildLaunchRoute,
-	buildMiniappEditRoute,
+	buildRealmMiniappsRoute,
+	buildRealmOverviewRoute,
+	buildRealmRoleCreateRoute,
+	buildRealmRoleMappingRoute,
+	buildRealmRolesRoute,
+	buildRealmRoute,
+	buildUserRoute,
+	ROUTES,
 } from './routes'

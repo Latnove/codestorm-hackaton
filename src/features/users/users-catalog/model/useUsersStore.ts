@@ -3,7 +3,6 @@ import {
 	type PlatformUser,
 	type PlatformUserStatus,
 	type Role,
-	type UserRealmRoles,
 } from '@/entities/user'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
@@ -19,12 +18,10 @@ interface UsersActions {
 	createUser: (user: PlatformUser) => void
 	updateUserAccess: (
 		userId: string,
-		values: Pick<PlatformUser, 'globalRoles' | 'status'>,
+		values: Pick<PlatformUser, 'email' | 'role' | 'status'>,
 	) => void
 	deleteUser: (userId: string) => void
 	toggleStatus: (userId: string) => void
-	assignRealmRoles: (userId: string, assignment: UserRealmRoles) => void
-	removeRealmRoles: (userId: string, realmCode: string) => void
 	setSearch: (search: string) => void
 	setStatus: (status: PlatformUserStatus | 'ALL') => void
 	setGlobalRole: (role: Role | 'ALL') => void
@@ -61,7 +58,8 @@ export const useUsersStore = create<UsersStore>()(
 							user.id === userId
 								? {
 										...user,
-										globalRoles: values.globalRoles,
+										email: values.email,
+										role: values.role,
 										status: values.status,
 										updatedAt: new Date().toISOString(),
 									}
@@ -90,7 +88,7 @@ export const useUsersStore = create<UsersStore>()(
 							user.id === userId
 								? {
 										...user,
-										status: user.status === 'active' ? 'blocked' : 'active',
+										status: user.status === 'active' ? 'disable' : 'active',
 										updatedAt: new Date().toISOString(),
 									}
 								: user,
@@ -98,50 +96,6 @@ export const useUsersStore = create<UsersStore>()(
 					}),
 					false,
 					'users/toggleStatus',
-				)
-			},
-
-			assignRealmRoles: (userId, assignment) => {
-				set(
-					state => ({
-						users: state.users.map(user => {
-							if (user.id !== userId) {
-								return user
-							}
-
-							const existingAssignments = user.realmRoles.filter(
-								item => item.realmCode !== assignment.realmCode,
-							)
-
-							return {
-								...user,
-								realmRoles: [...existingAssignments, assignment],
-								updatedAt: new Date().toISOString(),
-							}
-						}),
-					}),
-					false,
-					'users/assignRealmRoles',
-				)
-			},
-
-			removeRealmRoles: (userId, realmCode) => {
-				set(
-					state => ({
-						users: state.users.map(user =>
-							user.id === userId
-								? {
-										...user,
-										realmRoles: user.realmRoles.filter(
-											item => item.realmCode !== realmCode,
-										),
-										updatedAt: new Date().toISOString(),
-									}
-								: user,
-						),
-					}),
-					false,
-					'users/removeRealmRoles',
 				)
 			},
 
@@ -173,9 +127,7 @@ export const selectFilteredUsers = (state: UsersStore) => {
 		const matchesStatus =
 			state.status === 'ALL' ? true : user.status === state.status
 		const matchesRole =
-			state.globalRole === 'ALL'
-				? true
-				: user.globalRoles.includes(state.globalRole)
+			state.globalRole === 'ALL' ? true : user.role === state.globalRole
 
 		return matchesSearch && matchesStatus && matchesRole
 	})
@@ -188,10 +140,8 @@ export const useUsersFiltersState = (state: UsersStore) => ({
 })
 
 export const useUsersActions = (state: UsersStore) => ({
-	assignRealmRoles: state.assignRealmRoles,
 	createUser: state.createUser,
 	deleteUser: state.deleteUser,
-	removeRealmRoles: state.removeRealmRoles,
 	setGlobalRole: state.setGlobalRole,
 	setSearch: state.setSearch,
 	setStatus: state.setStatus,
