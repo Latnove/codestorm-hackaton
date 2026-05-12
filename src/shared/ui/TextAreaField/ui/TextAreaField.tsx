@@ -10,7 +10,9 @@ import styles from './TextAreaField.module.css'
 
 const { Text } = Typography
 
-type TextAreaFieldProps<TValues extends FieldValues> = {
+interface TextAreaFieldProps<
+	TValues extends FieldValues,
+> extends TextAreaProps {
 	control: Control<TValues>
 	name: FieldPath<TValues>
 	label: string
@@ -28,6 +30,7 @@ export const TextAreaField = <TValues extends FieldValues>({
 	label,
 	name,
 	placeholder,
+	...props
 }: TextAreaFieldProps<TValues>) => {
 	return (
 		<Controller
@@ -42,6 +45,7 @@ export const TextAreaField = <TValues extends FieldValues>({
 
 						<Input.TextArea
 							{...field}
+							{...props}
 							autoSize={autoSize}
 							className={styles.textarea}
 							disabled={disabled}
