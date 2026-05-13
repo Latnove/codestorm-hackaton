@@ -1,5 +1,6 @@
-import { generateSecret } from '@/features/realms/create-realm/lib'
+import { realmKeys, rotateRealmClientSecret } from '@/entities/realm'
 import { ButtonField } from '@/shared/ui/ButtonField'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Alert, Input, message, Modal, Typography } from 'antd'
 import { useState } from 'react'
 import styles from './RotateSecretButton.module.css'
@@ -15,8 +16,28 @@ export const RotateSecretButton = ({
 	clientId,
 	realmCode,
 }: RotateSecretButtonProps) => {
+	const queryClient = useQueryClient()
 	const [modal, contextHolder] = Modal.useModal()
 	const [secret, setSecret] = useState<string | null>(null)
+	const rotateSecretMutation = useMutation({
+		mutationFn: () => {
+			if (!clientId) {
+				throw new Error('clientId is required')
+			}
+
+			return rotateRealmClientSecret(realmCode, clientId)
+		},
+		onSuccess: response => {
+			setSecret(response.clientSecret)
+			void queryClient.invalidateQueries({
+				queryKey: realmKeys.clients(realmCode),
+			})
+			message.success('clientSecret обновлён')
+		},
+		onError: () => {
+			message.error('Не удалось обновить clientSecret')
+		},
+	})
 
 	const handleCopy = async () => {
 		if (!secret) {
@@ -35,9 +56,7 @@ export const RotateSecretButton = ({
 				'После ротации старый clientSecret перестанет работать. Его нужно будет обновить в backend-сервисе host-приложения.',
 			okText: 'Обновить Secret',
 			onOk: async () => {
-				await Promise.resolve()
-				setSecret(generateSecret())
-				message.success('clientSecret обновлён')
+				await rotateSecretMutation.mutateAsync()
 			},
 			title: 'Обновить clientSecret?',
 		})

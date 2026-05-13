@@ -1,0 +1,96 @@
+import { create } from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
+
+import type { AdminCopilotMessage } from './types'
+
+const buildSessionId = () => crypto.randomUUID()
+
+interface AdminCopilotState {
+	isOpen: boolean
+	messages: AdminCopilotMessage[]
+	sessionId: string
+}
+
+interface AdminCopilotActions {
+	addMessage: (message: AdminCopilotMessage) => void
+	clear: () => void
+	close: () => void
+	open: () => void
+	setSessionId: (sessionId: string) => void
+	toggle: () => void
+	updateMessage: (id: string, patch: Partial<AdminCopilotMessage>) => void
+}
+
+type AdminCopilotStore = AdminCopilotState & AdminCopilotActions
+
+export const useAdminCopilotStore = create<AdminCopilotStore>()(
+	devtools(
+		persist(
+			set => ({
+				isOpen: false,
+				messages: [],
+				sessionId: buildSessionId(),
+
+				addMessage: message => {
+					set(
+						state => ({ messages: [...state.messages, message] }),
+						false,
+						'admin-copilot/addMessage',
+					)
+				},
+
+				clear: () => {
+					set(
+						{
+							messages: [],
+							sessionId: buildSessionId(),
+						},
+						false,
+						'admin-copilot/clear',
+					)
+				},
+
+				close: () => {
+					set({ isOpen: false }, false, 'admin-copilot/close')
+				},
+
+				open: () => {
+					set({ isOpen: true }, false, 'admin-copilot/open')
+				},
+
+				setSessionId: sessionId => {
+					set({ sessionId }, false, 'admin-copilot/setSessionId')
+				},
+
+				toggle: () => {
+					set(
+						state => ({ isOpen: !state.isOpen }),
+						false,
+						'admin-copilot/toggle',
+					)
+				},
+
+				updateMessage: (id, patch) => {
+					set(
+						state => ({
+							messages: state.messages.map(message =>
+								message.id === id ? { ...message, ...patch } : message,
+							),
+						}),
+						false,
+						'admin-copilot/updateMessage',
+					)
+				},
+			}),
+			{
+				name: 'admin-copilot-store',
+				partialize: state => ({
+					isOpen: state.isOpen,
+					messages: state.messages,
+					sessionId: state.sessionId,
+				}),
+			},
+		),
+		{ name: 'admin-copilot-store' },
+	),
+)

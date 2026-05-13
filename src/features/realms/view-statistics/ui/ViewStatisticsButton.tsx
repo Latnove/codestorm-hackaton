@@ -1,5 +1,6 @@
+import { buildDashboardRoute } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
-import { message } from 'antd'
+import { useNavigate } from 'react-router-dom'
 
 interface ViewStatisticsButtonProps {
 	realmCode: string
@@ -8,12 +9,12 @@ interface ViewStatisticsButtonProps {
 export const ViewStatisticsButton = ({
 	realmCode,
 }: ViewStatisticsButtonProps) => {
+	const navigate = useNavigate()
+
 	return (
 		<ButtonField
 			onClick={() => {
-				message.info(
-					`View Statistics для ${realmCode} будет добавлен следующим шагом`,
-				)
+				navigate(buildDashboardRoute({ realmCode }))
 			}}
 		>
 			Посмотреть статистику

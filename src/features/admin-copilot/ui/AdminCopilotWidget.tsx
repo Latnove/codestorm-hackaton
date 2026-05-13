@@ -1,25 +1,34 @@
 import { MessageOutlined } from '@ant-design/icons'
-import { FloatButton } from 'antd'
+import { Button, Tooltip } from 'antd'
 
-import { useAdminCopilotStore } from '../model/useAdminCopilotStore'
+import { useUserStore } from '@/entities/user'
+
+import { useAdminCopilotStore } from '../model/adminCopilotStore'
+import styles from './AdminCopilot.module.css'
 import { AdminCopilotDrawer } from './AdminCopilotDrawer'
 
-import styles from './AdminCopilot.module.css'
-
 export const AdminCopilotWidget = () => {
-	const isOpen = useAdminCopilotStore(state => state.isOpen)
+	const user = useUserStore(state => state.user)
+	const accessToken = useUserStore(state => state.accessToken)
 	const open = useAdminCopilotStore(state => state.open)
+
+	if (!user || !accessToken) {
+		return null
+	}
 
 	return (
 		<>
-			<FloatButton
-				icon={<MessageOutlined />}
-				onClick={open}
-				type='primary'
-				className={styles.floatingButton}
-			/>
-
-			<AdminCopilotDrawer open={isOpen} />
+			<Tooltip title='Admin Copilot'>
+				<Button
+					aria-label='Open Admin Copilot'
+					className={styles.floatingButton}
+					icon={<MessageOutlined />}
+					onClick={open}
+					shape='circle'
+					type='primary'
+				/>
+			</Tooltip>
+			<AdminCopilotDrawer />
 		</>
 	)
 }

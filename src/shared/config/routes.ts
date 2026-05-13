@@ -17,8 +17,6 @@ export const ROUTES = {
 	REALM_ROLES: '/realms/:realmCode/roles',
 	REALM_ROLE_MAPPING: '/realms/:realmCode/role-mapping',
 	LAUNCH: '/launch/:miniappId',
-	ANALYTICS: '/analytics',
-	AUDIT_LOGS: '/audit-logs',
 	FORBIDDEN: '/forbidden',
 	NOT_FOUND: '/not-found',
 } as const
@@ -61,3 +59,39 @@ export const buildRealmRoleMappingRoute = (realmCode: string) =>
 	`/realms/${realmCode}/role-mapping`
 
 export const buildUserRoute = (userId: string) => `/users/${userId}`
+
+export const buildUserCreateRoute = (params?: { realmCode?: string }) => {
+	const searchParams = new URLSearchParams()
+
+	if (params?.realmCode) {
+		searchParams.set('realmCode', params.realmCode)
+	}
+
+	const query = searchParams.toString()
+
+	return query ? `${ROUTES.USER_CREATE}?${query}` : ROUTES.USER_CREATE
+}
+
+export const buildDashboardRoute = (params?: {
+	miniAppCode?: string
+	realmCode?: string
+	range?: string
+}) => {
+	const searchParams = new URLSearchParams()
+
+	if (params?.realmCode) {
+		searchParams.set('realmCode', params.realmCode)
+	}
+
+	if (params?.miniAppCode) {
+		searchParams.set('miniAppCode', params.miniAppCode)
+	}
+
+	if (params?.range) {
+		searchParams.set('range', params.range)
+	}
+
+	const query = searchParams.toString()
+
+	return query ? `${ROUTES.DASHBOARD}?${query}` : ROUTES.DASHBOARD
+}

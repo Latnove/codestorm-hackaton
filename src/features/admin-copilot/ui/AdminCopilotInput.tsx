@@ -1,131 +1,122 @@
-import { ButtonField } from '@/shared/ui/ButtonField'
-import { TextAreaField } from '@/shared/ui/TextAreaField'
-import { PaperClipOutlined, SendOutlined } from '@ant-design/icons'
-import type { UploadFile } from 'antd'
-import { Button, Upload, message } from 'antd'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-
 import {
-	sendAdminCopilotChat,
-	uploadAdminCopilotMedia,
-} from '../api/adminCopilotApi'
-import type { AdminCopilotAttachment } from '../model/types'
-import { useAdminCopilotStore } from '../model/useAdminCopilotStore'
+	CloseOutlined,
+	PaperClipOutlined,
+	SendOutlined,
+} from '@ant-design/icons'
+import { Button, Input, Tag, Tooltip } from 'antd'
+import type { ChangeEvent } from 'react'
+import { useRef, useState } from 'react'
+
 import styles from './AdminCopilot.module.css'
 
-type AdminCopilotInputForm = {
-	text: string
+interface AdminCopilotInputProps {
+	disabled?: boolean
+	onSend: (text: string, files: File[]) => void
 }
 
-export const AdminCopilotInput = () => {
-	const sessionId = useAdminCopilotStore(state => state.sessionId)
-	const addMessage = useAdminCopilotStore(state => state.addMessage)
-	const updateMessage = useAdminCopilotStore(state => state.updateMessage)
+const { TextArea } = Input
 
-	const [files, setFiles] = useState<UploadFile[]>([])
-	const [isSending, setIsSending] = useState(false)
+export const AdminCopilotInput = ({
+	disabled = false,
+	onSend,
+}: AdminCopilotInputProps) => {
+	const fileInputRef = useRef<HTMLInputElement | null>(null)
+	const [text, setText] = useState('')
+	const [files, setFiles] = useState<File[]>([])
+	const canSend = Boolean(text.trim() || files.length > 0) && !disabled
 
-	const { control, handleSubmit, reset, watch } =
-		useForm<AdminCopilotInputForm>({
-			defaultValues: {
-				text: '',
-			},
-		})
+	const handleAttach = () => {
+		fileInputRef.current?.click()
+	}
 
-	const text = watch('text')
-	const canSend = Boolean(text.trim()) || files.length > 0
+	const handleFilesChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const nextFiles = Array.from(event.target.files ?? [])
 
-	const onSubmit = handleSubmit(async values => {
-		if (!canSend || isSending) {
+		if (nextFiles.length > 0) {
+			setFiles(current => [...current, ...nextFiles])
+		}
+
+		event.target.value = ''
+	}
+
+	const removeFile = (index: number) => {
+		setFiles(current => current.filter((_, fileIndex) => fileIndex !== index))
+	}
+
+	const handleSend = () => {
+		if (!canSend) {
 			return
 		}
 
-		setIsSending(true)
-
-		const currentText = values.text.trim()
-		const currentFiles = files
-
-		reset()
+		onSend(text, files)
+		setText('')
 		setFiles([])
-
-		try {
-			const attachments: AdminCopilotAttachment[] = await Promise.all(
-				currentFiles
-					.map(file => file.originFileObj)
-					.filter(Boolean)
-					.map(file => uploadAdminCopilotMedia(file as File)),
-			)
-
-			addMessage({
-				id: crypto.randomUUID(),
-				role: 'user',
-				text: currentText,
-				attachments,
-				createdAt: new Date().toISOString(),
-				status: 'sent',
-			})
-
-			const assistantId = crypto.randomUUID()
-
-			addMessage({
-				id: assistantId,
-				role: 'assistant',
-				text: '',
-				createdAt: new Date().toISOString(),
-				status: 'sending',
-			})
-
-			const response = await sendAdminCopilotChat({
-				sessionId,
-				text: currentText,
-				attachments,
-			})
-
-			updateMessage(assistantId, {
-				text: response.text,
-				status: 'sent',
-			})
-		} catch {
-			message.error('Admin Copilot unavailable')
-		} finally {
-			setIsSending(false)
-		}
-	})
+	}
 
 	return (
-		<form className={styles.inputPanel} onSubmit={onSubmit}>
-			<Upload
-				beforeUpload={() => false}
-				fileList={files}
-				multiple
-				onChange={({ fileList }) => setFiles(fileList)}
-			>
-				<Button icon={<PaperClipOutlined />} />
-			</Upload>
-
-			<TextAreaField
-				autoSize={{ minRows: 1, maxRows: 4 }}
+		<div className={styles.inputPanel}>
+			<TextArea
+				autoSize={{ maxRows: 5, minRows: 3 }}
 				className={styles.textarea}
-				control={control}
-				label=''
-				name='text'
+				disabled={disabled}
+				onChange={event => setText(event.target.value)}
 				onPressEnter={event => {
 					if (!event.shiftKey) {
 						event.preventDefault()
-						onSubmit()
+						handleSend()
 					}
 				}}
-				placeholder='Спросить Copilot...'
+				placeholder='Напишите сообщение'
+				value={text}
 			/>
 
-			<ButtonField
-				disabled={!canSend}
-				htmlType='submit'
-				icon={<SendOutlined />}
-				loading={isSending}
-				type='primary'
-			/>
-		</form>
+			{files.length > 0 ? (
+				<div className={styles.selectedFiles}>
+					{files.map((file, index) => (
+						<Tag
+							className={styles.fileChip}
+							closeIcon={<CloseOutlined />}
+							key={`${file.name}-${file.lastModified}-${index}`}
+							onClose={event => {
+								event.preventDefault()
+								removeFile(index)
+							}}
+						>
+							{file.name}
+						</Tag>
+					))}
+				</div>
+			) : null}
+
+			<div className={styles.inputActions}>
+				<input
+					className={styles.hiddenInput}
+					multiple
+					onChange={handleFilesChange}
+					ref={fileInputRef}
+					type='file'
+				/>
+
+				<Tooltip title='Прикрепить файлы'>
+					<Button
+						disabled={disabled}
+						icon={<PaperClipOutlined />}
+						onClick={handleAttach}
+					/>
+				</Tooltip>
+
+				<div className={styles.inputActionsRight}>
+					<Button
+						disabled={!canSend}
+						icon={<SendOutlined />}
+						loading={disabled}
+						onClick={handleSend}
+						type='primary'
+					>
+						Send
+					</Button>
+				</div>
+			</div>
+		</div>
 	)
 }

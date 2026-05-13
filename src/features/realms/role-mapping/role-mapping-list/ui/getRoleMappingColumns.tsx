@@ -17,6 +17,7 @@ interface GetRoleMappingColumnsParams {
 	editingId: string | null
 	realmRoleOptions: Array<{ label: string; value: string }>
 	saveRow: () => void
+	saving: boolean
 	startEdit: (mapping: RoleMappingRow) => void
 	updateValue: UpdateRoleMappingValue
 	values: RoleMappingFormValues
@@ -27,6 +28,7 @@ export const getRoleMappingColumns = ({
 	editingId,
 	realmRoleOptions,
 	saveRow,
+	saving,
 	startEdit,
 	updateValue,
 	values,
@@ -69,7 +71,11 @@ export const getRoleMappingColumns = ({
 		align: 'center',
 		render: (_, row) =>
 			row.id === editingId ? (
-				<RoleMappingEditActions onCancel={cancelEdit} onSave={saveRow} />
+				<RoleMappingEditActions
+					loading={saving}
+					onCancel={cancelEdit}
+					onSave={saveRow}
+				/>
 			) : (
 				<RoleMappingActions mapping={row} onEdit={startEdit} />
 		),

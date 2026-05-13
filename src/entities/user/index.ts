@@ -2,6 +2,30 @@ export {
 	roleLabels,
 	Roles,
 } from './model/roles'
+export {
+	activatePlatformUser,
+	blockPlatformUser,
+	buildUserFromAuthPayload,
+	changePlatformUserAccess,
+	createPlatformUser,
+	getPlatformUser,
+	getPlatformUsers,
+	loginAdmin,
+	logoutAdmin,
+	mapRoleToCoreGlobalRole,
+	mapPlatformUserToAuthUser,
+	mapUserStatusToDto,
+	updatePlatformUser,
+	updatePlatformUserAndAccess,
+	userKeys,
+	type AuthGlobalRole,
+	type CoreGlobalRole,
+	type CreateUserRequest,
+	type PlatformUserResponse,
+	type TokenResponse,
+	type UserStatusDto,
+	type UsersListParams,
+} from './api/userApi'
 export { canAccessRealm } from './model/realmAccess'
 export {
 	platformUserStatusColors,
@@ -21,4 +45,5 @@ export {
 	useUserActions,
 	useUserState,
 	useUserStore,
+	getStoredAuthUserId,
 } from './model/useUserStore'

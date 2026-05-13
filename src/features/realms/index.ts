@@ -1,6 +1,7 @@
 export {
 	selectFilteredRealms,
 	useRealmsActions,
+	useRealmsFiltersState,
 	useRealmsStore,
 } from './realms-catalog/model/useRealmsStore'
 export { DeleteRealmButton } from './delete-realm'

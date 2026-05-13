@@ -1,10 +1,13 @@
 import {
+	createRoleMapping,
 	roleMappingSchema,
+	roleMappingKeys,
+	updateRoleMapping,
 	type ExternalRoleMapping,
 	type RealmRole,
 	type RoleMappingFormValues,
 } from '@/entities/realm'
-import { useRoleMappingsStore } from '@/features/realms/role-mapping/model'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useMemo, useState } from 'react'
 import {
@@ -34,12 +37,7 @@ export const useRoleMappingEditor = ({
 	realmCode,
 	realmRoles,
 }: UseRoleMappingEditorParams) => {
-	const createRoleMapping = useRoleMappingsStore(
-		state => state.createRoleMapping,
-	)
-	const updateRoleMapping = useRoleMappingsStore(
-		state => state.updateRoleMapping,
-	)
+	const queryClient = useQueryClient()
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [values, setValues] = useState<RoleMappingFormValues>({
 		...emptyRoleMappingValues,
@@ -49,6 +47,42 @@ export const useRoleMappingEditor = ({
 		() => buildRealmRoleOptions(realmRoles),
 		[realmRoles],
 	)
+	const invalidateMappings = () => {
+		void queryClient.invalidateQueries({
+			queryKey: roleMappingKeys.list(realmCode),
+		})
+	}
+	const createMappingMutation = useMutation({
+		mutationFn: (nextValues: RoleMappingFormValues) =>
+			createRoleMapping(realmCode, nextValues),
+		onSuccess: mapping => {
+			invalidateMappings()
+			message.success(`Mapping для ${mapping.externalRole} создан`)
+			cancelEdit()
+		},
+		onError: () => {
+			message.error('Не удалось создать mapping')
+		},
+	})
+	const updateMappingMutation = useMutation({
+		mutationFn: (nextValues: RoleMappingFormValues) => {
+			if (!editingId) {
+				return Promise.reject(new Error('Mapping id is required'))
+			}
+
+			return updateRoleMapping(realmCode, editingId, {
+				realmRoleCode: nextValues.realmRoleCode,
+			})
+		},
+		onSuccess: mapping => {
+			invalidateMappings()
+			message.success(`Mapping для ${mapping.externalRole} обновлён`)
+			cancelEdit()
+		},
+		onError: () => {
+			message.error('Не удалось обновить mapping')
+		},
+	})
 
 	const dataSource: RoleMappingRow[] = useMemo(
 		() =>
@@ -100,16 +134,12 @@ export const useRoleMappingEditor = ({
 		}
 
 		if (editingId === NEW_MAPPING_ID) {
-			createRoleMapping(realmCode, result.data)
-			message.success(`Mapping для ${result.data.externalRole} создан`)
-			cancelEdit()
+			createMappingMutation.mutate(result.data)
 			return
 		}
 
 		if (editingId) {
-			updateRoleMapping(editingId, result.data)
-			message.success(`Mapping для ${result.data.externalRole} обновлён`)
-			cancelEdit()
+			updateMappingMutation.mutate(result.data)
 		}
 	}
 
@@ -122,6 +152,7 @@ export const useRoleMappingEditor = ({
 		saveRow,
 		startCreate,
 		startEdit,
+		saving: createMappingMutation.isPending || updateMappingMutation.isPending,
 		updateValue,
 		values,
 	}

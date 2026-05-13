@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { Alert, Button, Card, Empty, Result, Skeleton, Typography } from 'antd'
 import { useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import {
 	buildDashboardChartData,
+	dashboardKeys,
 	getDashboardMetrics,
 } from '@/entities/dashboard'
 import { DashboardMetricsGrid } from '@/features/dashboard-metrics'
@@ -28,6 +30,18 @@ const formatUpdatedAt = (value: number) =>
 		: '—'
 
 const getErrorStatus = (error: unknown) => {
+	if (
+		typeof error === 'object' &&
+		error !== null &&
+		'response' in error &&
+		typeof (error as { response?: { status?: unknown } }).response?.status !==
+			'undefined'
+	) {
+		const status = Number((error as { response?: { status?: unknown } }).response?.status)
+
+		return Number.isNaN(status) ? undefined : status
+	}
+
 	if (typeof error !== 'object' || error === null || !('status' in error)) {
 		return undefined
 	}
@@ -51,6 +65,18 @@ const DashboardSkeleton = () => (
 )
 
 export const DashboardPage = () => {
+	const [searchParams, setSearchParams] = useSearchParams()
+	const metricsParams = useMemo(() => {
+		const range = searchParams.get('range')?.trim() || '10m'
+		const realmCode = searchParams.get('realmCode')?.trim()
+		const miniAppCode = searchParams.get('miniAppCode')?.trim()
+
+		return {
+			miniAppCode: miniAppCode || undefined,
+			range,
+			realmCode: realmCode || undefined,
+		}
+	}, [searchParams])
 	const {
 		data: points = [],
 		dataUpdatedAt,
@@ -59,8 +85,8 @@ export const DashboardPage = () => {
 		isLoading,
 		refetch,
 	} = useQuery({
-		queryFn: getDashboardMetrics,
-		queryKey: ['dashboard-metrics'],
+		queryFn: () => getDashboardMetrics(metricsParams),
+		queryKey: dashboardKeys.metrics(metricsParams),
 		refetchInterval: 10_000,
 		placeholderData: previousData => previousData,
 	})
@@ -73,6 +99,21 @@ export const DashboardPage = () => {
 	const isInitialLoading = isLoading && !hasPoints
 	const isFirstLoadError = isError && !hasPoints
 	const isPollingError = isError && hasPoints
+	const hasScope = Boolean(metricsParams.realmCode || metricsParams.miniAppCode)
+	const scopeLabel = [
+		metricsParams.realmCode ? `Realm: ${metricsParams.realmCode}` : null,
+		metricsParams.miniAppCode ? `MiniApp: ${metricsParams.miniAppCode}` : null,
+	]
+		.filter(Boolean)
+		.join(' / ')
+
+	const clearScope = () => {
+		const nextParams = new URLSearchParams(searchParams)
+
+		nextParams.delete('realmCode')
+		nextParams.delete('miniAppCode')
+		setSearchParams(nextParams)
+	}
 
 	const renderContent = () => {
 		if (isInitialLoading) {
@@ -133,13 +174,27 @@ export const DashboardPage = () => {
 							Дашборд
 						</Title>
 						<Text className={styles.subtitle}>
-							Живые метрики, которые обновляются каждые 10 секунд
+							Статистика платформы, которая обновляется каждые 10 секунд
 						</Text>
 					</div>
 
-					<div className={styles.updatedAt}>
-						<Text type='secondary'>Обновлено</Text>
-						<Text strong>{formatUpdatedAt(dataUpdatedAt)}</Text>
+					<div className={styles.headerMeta}>
+						<div className={styles.updatedAt}>
+							<Text type='secondary'>Обновлено</Text>
+							<Text strong>{formatUpdatedAt(dataUpdatedAt)}</Text>
+						</div>
+
+						{hasScope && (
+							<div className={styles.scope}>
+								<div>
+									<Text type='secondary'>Фильтр</Text>
+									<Text strong>{scopeLabel}</Text>
+								</div>
+								<Button onClick={clearScope} size='small'>
+									Сбросить
+								</Button>
+							</div>
+						)}
 					</div>
 				</div>
 

@@ -3,17 +3,19 @@ import {
 	realmMiniAppStatusColors,
 	realmMiniAppStatusLabels,
 	roleMatchModeLabels,
+	getRealmMiniApp,
+	realmMiniAppKeys,
 	type RealmMiniApp,
 } from '@/entities/miniapp'
 import { getRealmMiniAppPermissions, useUserStore } from '@/entities/user'
-import { selectRealmMiniApp, useRealmMiniAppsStore } from '@/features/miniapps'
-import { useRealmsStore } from '@/features/realms'
+import { getAdminRealm, realmKeys } from '@/entities/realm'
 import {
 	buildRealmMiniappsRoute,
 	buildRealmOverviewRoute,
 	ROUTES,
 } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
+import { useQuery } from '@tanstack/react-query'
 import { Card, Space, Tag, Typography } from 'antd'
 import type { ReactNode } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
@@ -45,13 +47,21 @@ export const MiniappDetailsPage = () => {
 	const navigate = useNavigate()
 	const { miniAppCode = '', realmCode = '' } = useParams()
 	const user = useUserStore(state => state.user)
-	const realm = useRealmsStore(state =>
-		state.realms.find(item => item.code === realmCode),
-	)
-	const miniApp = useRealmMiniAppsStore(
-		selectRealmMiniApp(realmCode, miniAppCode),
-	)
+	const { data: realm, isLoading: isRealmLoading } = useQuery({
+		enabled: Boolean(realmCode),
+		queryFn: () => getAdminRealm(realmCode),
+		queryKey: realmKeys.detail(realmCode),
+	})
+	const { data: miniApp, isLoading: isMiniAppLoading } = useQuery({
+		enabled: Boolean(realmCode && miniAppCode),
+		queryFn: () => getRealmMiniApp(realmCode, miniAppCode),
+		queryKey: realmMiniAppKeys.detail(realmCode, miniAppCode),
+	})
 	const permissions = getRealmMiniAppPermissions(user, realmCode)
+
+	if (isRealmLoading || isMiniAppLoading) {
+		return null
+	}
 
 	if (!realm) {
 		return <Navigate to={ROUTES.NOT_FOUND} />

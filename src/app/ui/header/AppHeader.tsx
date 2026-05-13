@@ -1,5 +1,6 @@
 import {
 	Roles,
+	logoutAdmin,
 	useUserActions,
 	useUserState,
 	useUserStore,
@@ -14,6 +15,7 @@ import {
 } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { Logo } from '@/shared/ui/Logo'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Layout } from 'antd'
 import clsx from 'clsx'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -37,8 +39,21 @@ const rootNavItems: AdminNavItem[] = [
 export const AppHeader = () => {
 	const location = useLocation()
 	const navigate = useNavigate()
-	const { user } = useUserStore(useShallow(useUserState))
+	const queryClient = useQueryClient()
+	const { refreshToken, user } = useUserStore(useShallow(useUserState))
 	const { logout } = useUserStore(useShallow(useUserActions))
+	const logoutMutation = useMutation({
+		mutationFn: async () => {
+			if (refreshToken) {
+				await logoutAdmin(refreshToken)
+			}
+		},
+		onSettled: () => {
+			logout()
+			queryClient.clear()
+			navigate(ROUTES.LOGIN)
+		},
+	})
 	const isRoot = user?.role === Roles.ROOT
 	const userRealmCode = !isRoot ? user?.realmCode : undefined
 	const adminNavItems = userRealmCode
@@ -116,8 +131,7 @@ export const AppHeader = () => {
 	}
 
 	const handleLogout = () => {
-		logout()
-		navigate(ROUTES.LOGIN)
+		logoutMutation.mutate()
 	}
 
 	return (
@@ -172,6 +186,15 @@ export const AppHeader = () => {
 								Мой Realm
 							</ButtonField>
 						)}
+
+						<ButtonField
+							className={styles.logoutButton}
+							loading={logoutMutation.isPending}
+							onClick={handleLogout}
+							type='default'
+						>
+							Выйти
+						</ButtonField>
 					</nav>
 				) : (
 					<ButtonField onClick={() => navigate(ROUTES.LOGIN)} type='primary'>

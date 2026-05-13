@@ -2,9 +2,15 @@ import { FileOutlined, LoadingOutlined } from '@ant-design/icons'
 import clsx from 'clsx'
 import { useEffect, useRef } from 'react'
 
-import type { AdminCopilotAttachment } from '../model/types'
-import { useAdminCopilotStore } from '../model/useAdminCopilotStore'
+import type {
+	AdminCopilotAttachment,
+	AdminCopilotMessage,
+} from '../model/types'
 import styles from './AdminCopilot.module.css'
+
+interface AdminCopilotMessagesProps {
+	messages: AdminCopilotMessage[]
+}
 
 const AttachmentPreview = ({
 	attachment,
@@ -34,9 +40,9 @@ const AttachmentPreview = ({
 	)
 }
 
-export const AdminCopilotMessages = () => {
-	const messages = useAdminCopilotStore(state => state.messages)
-
+export const AdminCopilotMessages = ({
+	messages,
+}: AdminCopilotMessagesProps) => {
 	const bottomRef = useRef<HTMLDivElement | null>(null)
 
 	useEffect(() => {
@@ -69,7 +75,7 @@ export const AdminCopilotMessages = () => {
 						<div
 							className={clsx(
 								styles.bubble,
-								isUser ? styles.bubbleUser : styles.bubbleAssistant,
+								isUser && styles.bubbleUser,
 								isError && styles.bubbleError,
 							)}
 						>

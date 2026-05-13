@@ -1,8 +1,8 @@
-import type { PlatformUser } from '@/entities/user'
-import { useUsersStore } from '@/features/users/users-catalog/model'
+import { blockPlatformUser, userKeys, type PlatformUser } from '@/entities/user'
 import { ROUTES } from '@/shared/config'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { DeleteConfirm } from '@/shared/ui/DeleteConfirm'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -19,14 +19,24 @@ export const DeleteUserButton = ({
 }: DeleteUserButtonProps) => {
 	const location = useLocation()
 	const navigate = useNavigate()
-	const deleteUser = useUsersStore(state => state.deleteUser)
+	const queryClient = useQueryClient()
+	const blockUserMutation = useMutation({
+		mutationFn: () => blockPlatformUser(user.id),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+			void queryClient.invalidateQueries({ queryKey: userKeys.detail(user.id) })
+			message.success(`${user.username} заблокирован`)
+			onDone?.()
+		},
+		onError: () => {
+			message.error(`Не удалось заблокировать ${user.username}`)
+		},
+	})
 
 	const handleDelete = () => {
 		const isCurrentUserPage = location.pathname === `/users/${user.id}`
 
-		deleteUser(user.id)
-		message.success(`${user.username} удалён`)
-		onDone?.()
+		blockUserMutation.mutate()
 
 		if (isCurrentUserPage) {
 			navigate(ROUTES.USERS, { replace: true })
@@ -35,13 +45,17 @@ export const DeleteUserButton = ({
 
 	return (
 		<DeleteConfirm
-			description='Пользователь будет удалён из списка.'
-			okText='Удалить'
+			description='В текущем API нет удаления пользователя, действие заблокирует аккаунт.'
+			okText='Заблокировать'
 			onConfirm={handleDelete}
-			title='Удалить пользователя?'
+			title='Заблокировать пользователя?'
 		>
-			<ButtonField danger type={variant === 'menu-item' ? 'text' : 'default'}>
-				Удалить
+			<ButtonField
+				danger
+				loading={blockUserMutation.isPending}
+				type={variant === 'menu-item' ? 'text' : 'default'}
+			>
+				Заблокировать
 			</ButtonField>
 		</DeleteConfirm>
 	)

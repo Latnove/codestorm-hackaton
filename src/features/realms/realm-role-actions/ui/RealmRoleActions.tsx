@@ -1,9 +1,14 @@
-import type { RealmRole } from '@/entities/realm'
+import {
+	deleteRealmRole,
+	realmRoleKeys,
+	roleMappingKeys,
+	type RealmRole,
+} from '@/entities/realm'
 import { RealmRoleFormButton } from '@/features/realms/create-role'
-import { useRealmRolesStore } from '@/features/realms/realm-roles/model'
 import { ActionsDropdown } from '@/shared/ui/ActionsDropdown'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { DeleteConfirm } from '@/shared/ui/DeleteConfirm'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message, Tooltip } from 'antd'
 import styles from './RealmRoleActions.module.css'
 
@@ -21,18 +26,31 @@ export const RealmRoleActions = ({
 	realmCode,
 	role,
 }: RealmRoleActionsProps) => {
-	const deleteRealmRole = useRealmRolesStore(state => state.deleteRealmRole)
+	const queryClient = useQueryClient()
 	const canDelete = role.usedInPoliciesCount === 0
+	const deleteRoleMutation = useMutation({
+		mutationFn: () => deleteRealmRole(realmCode, role.code),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: realmRoleKeys.list(realmCode),
+			})
+			void queryClient.invalidateQueries({
+				queryKey: roleMappingKeys.list(realmCode),
+			})
+			message.success(`Роль ${role.code} удалена`)
+		},
+		onError: () => {
+			message.error(`Не удалось удалить роль ${role.code}`)
+		},
+	})
 
 	const handleDelete = (onDone: () => void) => {
-		const deleted = deleteRealmRole(role.id)
-
-		if (!deleted) {
+		if (!canDelete) {
 			message.warning(DELETE_BLOCKED_MESSAGE)
 			return
 		}
 
-		message.success(`Роль ${role.code} удалена`)
+		deleteRoleMutation.mutate()
 		onDone()
 	}
 
@@ -40,6 +58,7 @@ export const RealmRoleActions = ({
 		<ButtonField
 			aria-disabled={!canDelete}
 			danger
+			loading={deleteRoleMutation.isPending}
 			onClick={() => {
 				if (!canDelete) {
 					message.warning(DELETE_BLOCKED_MESSAGE)

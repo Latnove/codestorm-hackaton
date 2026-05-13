@@ -41,6 +41,7 @@ export type ExternalRoleMapping = {
 	realmCode: string
 	externalRole: string
 	realmRoleCode: string
+	source?: 'HOST_ROLE'
 	createdAt: string
 	updatedAt: string
 }

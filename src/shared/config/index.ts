@@ -1,5 +1,5 @@
-export { EXTERNAL_LINKS } from './external'
 export {
+	buildDashboardRoute,
 	buildRealmMiniappAccessRoute,
 	buildRealmMiniappCreateRoute,
 	buildRealmMiniappEditRoute,
@@ -11,6 +11,7 @@ export {
 	buildRealmRoleMappingRoute,
 	buildRealmRolesRoute,
 	buildRealmRoute,
+	buildUserCreateRoute,
 	buildUserRoute,
 	ROUTES,
 } from './routes'

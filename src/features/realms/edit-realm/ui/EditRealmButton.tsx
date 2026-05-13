@@ -1,13 +1,15 @@
 import {
 	createRealmSchema,
+	realmKeys,
+	updateAdminRealm,
 	type CreateRealmFormValues,
 	type Realm,
 } from '@/entities/realm'
-import { useRealmsStore } from '@/features/realms/realms-catalog/model'
 import { ButtonField } from '@/shared/ui/ButtonField'
 import { InputField } from '@/shared/ui/InputField'
 import { TextAreaField } from '@/shared/ui/TextAreaField'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Modal, Typography, message } from 'antd'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -30,8 +32,8 @@ export const EditRealmButton = ({
 	realm,
 	variant = 'button',
 }: EditRealmButtonProps) => {
+	const queryClient = useQueryClient()
 	const [isOpen, setIsOpen] = useState(false)
-	const updateRealm = useRealmsStore(state => state.updateRealm)
 	const initialValues: CreateRealmFormValues = {
 		code: realm.code,
 		description: realm.description ?? '',
@@ -48,6 +50,22 @@ export const EditRealmButton = ({
 		mode: 'onBlur',
 		resolver: zodResolver(createRealmSchema),
 	})
+	const updateRealmMutation = useMutation({
+		mutationFn: (values: Pick<CreateRealmFormValues, 'description' | 'name'>) =>
+			updateAdminRealm(realm.code, values),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: realmKeys.lists() })
+			void queryClient.invalidateQueries({
+				queryKey: realmKeys.detail(realm.code),
+			})
+			message.success(`Realm ${realm.code} обновлён`)
+			setIsOpen(false)
+			onDone?.()
+		},
+		onError: () => {
+			message.error(`Не удалось обновить Realm ${realm.code}`)
+		},
+	})
 
 	const handleOpen = () => {
 		reset(initialValues)
@@ -61,15 +79,10 @@ export const EditRealmButton = ({
 	}
 
 	const handleEdit = handleSubmit(values => {
-		updateRealm(realm.code, {
+		updateRealmMutation.mutate({
 			description: values.description,
 			name: values.name,
 		})
-
-		message.success(`Realm ${realm.code} обновлён`)
-
-		setIsOpen(false)
-		onDone?.()
 	})
 
 	return (
@@ -129,7 +142,7 @@ export const EditRealmButton = ({
 						<div className={styles.submitRow}>
 							<ButtonField
 								htmlType='submit'
-								loading={isSubmitting}
+								loading={isSubmitting || updateRealmMutation.isPending}
 								type='primary'
 							>
 								Сохранить

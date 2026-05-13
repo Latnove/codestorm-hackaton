@@ -1,23 +1,24 @@
-import { useUsersStore } from '@/features/users'
+import { getPlatformUsers, userKeys } from '@/entities/user'
 import { UsersListPanel } from '@/widgets/users-list-panel'
-import { useShallow } from 'zustand/react/shallow'
+import { useQuery } from '@tanstack/react-query'
 
 interface RealmUsersListProps {
 	realmCode: string
 }
 
 export const RealmUsersList = ({ realmCode }: RealmUsersListProps) => {
-	const users = useUsersStore(
-		useShallow(state =>
-			state.users.filter(user => user.realmCode === realmCode),
-		),
-	)
+	const params = { realmCode, size: 100 }
+	const { data } = useQuery({
+		enabled: Boolean(realmCode),
+		queryFn: () => getPlatformUsers(params),
+		queryKey: userKeys.list(params),
+	})
 
 	return (
 		<UsersListPanel
 			description='Пользователи платформы, связанные с текущим Realm'
 			title='Связанные пользователи'
-			users={users}
+			users={data?.items ?? []}
 		/>
 	)
 }

@@ -22,7 +22,7 @@ export const RoleMappingExternalRoleCell = ({
 	updateValue,
 	values,
 }: RoleMappingEditableCellProps) => {
-	if (row.id !== editingId) {
+	if (row.id !== editingId || !row.isDraft) {
 		return <Text className={styles.externalRole}>{row.externalRole}</Text>
 	}
 
